@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## 2.31.7 (2023-03-16)
+
+
+### Bug Fixes
+
+* issue with versioning ([25fb61e](https://github.com/skyslit/ark-2/commit/25fb61e49aefba97f8ce8a16ce09d0f2228ae5d1))
+
+
+
+
+
 ## [2.31.5](https://github.com/skyslit/ark/compare/v2.31.4...v2.31.5) (2023-02-25)
 
 

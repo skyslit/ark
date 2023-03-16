@@ -1,0 +1,65 @@
+name: Release to NPM
+
+on:
+  push:
+    branches: [master]
+
+  workflow_dispatch:
+
+jobs:
+  Publish:
+    runs-on: macos-12
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: '14.18.x'
+
+      - name: Git Identity
+        run: |
+          git config --global user.name 'CI'
+          git config --global user.email 'ci@bots.skyslit.com'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Config & Authenticate NPM
+        run: |
+          npm config set registry https://registry.npmjs.org/
+          npm set //registry.npmjs.org/:_authToken ${{ secrets.NPM_TOKEN }}
+          npm whoami
+
+      - name: Check NPM Registry Access
+        run: npm whoami
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Install Dependencies
+        run: |
+          npm install
+          npm run bootstrap
+
+      - name: Install jest
+        run: npm install jest@27.5.1 -g
+
+      - name: Install lerna
+        run: npm install lerna@^4.0.0 -g
+
+      - name: Build
+        run: npm run build
+
+      - name: Test
+        run: npm run test
+
+      - name: Publish
+        run: lerna publish --conventional-commits --yes --no-verify-access
+        env:
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload coverage report
+        run: ./node_modules/.bin/codecov --token="${{ secrets.CODECOV_TOKEN }}"

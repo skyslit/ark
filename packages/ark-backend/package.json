@@ -1,0 +1,78 @@
+{
+  "name": "@skyslit/ark-backend",
+  "version": "2.31.5",
+  "description": "A business framework for building Ark based event driven backend application",
+  "main": "./build/index.js",
+  "private": false,
+  "scripts": {
+    "test": "jest --maxWorkers=1",
+    "start": "jest --watchAll --maxWorkers=1",
+    "build": "tsc"
+  },
+  "author": "Skyslit Network Private Limited",
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "devDependencies": {
+    "@babel/core": "^7.12.3",
+    "@babel/plugin-proposal-class-properties": "^7.12.1",
+    "@babel/plugin-syntax-dynamic-import": "^7.8.3",
+    "@babel/preset-env": "^7.12.1",
+    "@babel/preset-react": "^7.12.7",
+    "@babel/preset-typescript": "^7.12.1",
+    "@skyslit/ark-core": "^2.28.1",
+    "@skyslit/ark-frontend": "^2.31.2",
+    "@types/cookie-parser": "^1.4.2",
+    "@types/express": "^4.17.9",
+    "@types/jest": "^26.0.15",
+    "@types/jsonwebtoken": "^8.5.0",
+    "@types/mongoose": "^5.10.0",
+    "@types/morgan": "^1.9.2",
+    "@types/react": "^16.0.1",
+    "@types/react-dom": "^16.0.1",
+    "@types/react-router-dom": "^5.1.6",
+    "@types/supertest": "^2.0.10",
+    "axios": "^0.27.2",
+    "express": "^4.17.1",
+    "joi": "17.3.0",
+    "memfs": "^3.2.0",
+    "mongodb-memory-server": "^6.9.2",
+    "mongoose": "^5.12.15",
+    "puppeteer": "^14.1.1",
+    "react": "^16.0.1",
+    "react-dom": "^16.0.1",
+    "react-helmet-async": "^1.0.7",
+    "react-router-dom": "5.2.0"
+  },
+  "peerDependencies": {
+    "express": "^4.17.1",
+    "joi": "^17.3.0",
+    "mongodb-memory-server": "^6.9.2",
+    "mongoose": "^5.10.15",
+    "react": "^16.0.1",
+    "react-dom": "^16.0.1",
+    "react-helmet-async": "^1.0.7",
+    "react-router-dom": "^5.2.0",
+    "supertest": "^6.0.1"
+  },
+  "dependencies": {
+    "@socket.io/redis-adapter": "^8.0.1",
+    "axios": "^0.27.2",
+    "body-parser": "^1.19.0",
+    "cookie-parser": "^1.4.5",
+    "jsonwebtoken": "^8.5.1",
+    "morgan": "^1.10.0",
+    "node-html-parser": "^2.0.0",
+    "path-to-regexp": "^6.2.0",
+    "redis": "^4.5.1",
+    "socket.io": "^4.5.4",
+    "supertest": "^6.0.1"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

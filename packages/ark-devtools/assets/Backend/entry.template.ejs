@@ -1,0 +1,17 @@
+import { runApp } from '@skyslit/ark-core';
+import { Backend } from '@skyslit/ark-backend';
+
+runApp(({use}) => {
+  const {useServer, useRoute} = use(Backend);
+  
+  useRoute('get', '/', (req, res) => {
+    res.json({
+        message: 'Hello World!'
+    })
+  });
+
+  useServer({
+    hostname: 'localhost',
+    port: 3000,
+  });
+});

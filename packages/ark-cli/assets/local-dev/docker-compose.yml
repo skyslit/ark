@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  dev-env:
+    container_name: ${TITLE}-local-dev-env
+    platform: linux/x86_64
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    tty: true
+    environment:
+      - NODE_PORT=${APP_PORT}
+      - MONGO_CONNECTION_STRING=mongodb://${IP_PREFIX}.128.2:27017/lakshya-exam-automation
+    volumes:
+      - myapp:/app
+      - ./root:/root
+    networks:
+      ark_dev_network:
+        ipv4_address: ${IP_PREFIX}.128.1
+
+  dev-db:
+    container_name: ${TITLE}-local-db
+    image: mongo:4.2
+    ports:
+      - ${MONGO_PORT}:27017
+    volumes:
+      - ./db-data:/data/db
+    networks:
+      ark_dev_network:
+        ipv4_address: ${IP_PREFIX}.128.2
+
+volumes:
+  myapp:
+
+networks:
+  ark_dev_network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: ${IP_PREFIX}.0.0/16

@@ -1,0 +1,29 @@
+{
+  "name": "@skyslit/ark-core",
+  "version": "2.28.1",
+  "description": "A pointer based library used for building Ark based applications",
+  "main": "./build/index.js",
+  "private": false,
+  "scripts": {
+    "test": "jest",
+    "start": "jest --watchAll",
+    "build": "tsc"
+  },
+  "author": "Skyslit Network Private Limited",
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "devDependencies": {
+    "@babel/core": "^7.18.2",
+    "@babel/preset-env": "^7.18.2",
+    "@babel/preset-typescript": "^7.17.12",
+    "@types/jest": "^26.0.24"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

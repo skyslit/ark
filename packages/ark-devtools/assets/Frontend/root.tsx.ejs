@@ -1,0 +1,14 @@
+// @ts-nocheck
+import React from 'react';
+import ReactDOM from 'react-dom';
+import {makeApp} from '@skyslit/ark-frontend';
+import _package from './<%= relativeAppFilePath %>';
+
+makeApp('csr', _package)
+    .then((App) => {
+      ReactDOM.hydrate(<App />,
+          document.getElementById('root'));
+    })
+    .catch((err) => {
+      console.error(err);
+    });

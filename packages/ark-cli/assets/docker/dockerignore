@@ -1,0 +1,3 @@
+node_modules
+build
+**/**/.ark-test-user.json

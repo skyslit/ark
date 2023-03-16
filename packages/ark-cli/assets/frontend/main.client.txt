@@ -1,0 +1,26 @@
+import React from 'react';
+import { createReactApp, Frontend } from '@skyslit/ark-frontend';
+import 'antd/dist/antd.css';
+<%- moduleImport.join('\n'); %>
+
+export default createReactApp(({<%- reactAppPropDeps.join(', '); %>}) => {
+  const { useRouteConfig } = use(Frontend);
+  
+  <%- runAppSnippets.join('\n\n'); %>
+
+  useRouteConfig('default', () => [
+    {
+      path: '*',
+      hideInMenu: true,
+      component: () => {
+        return (
+          <iframe src="https://skyslit-web.firebaseapp.com/research/ark/boilerplate" style={{ 
+            width: '100vw',
+            height: '100vh',
+            border: 'none'
+          }} />
+        )
+      }
+    }
+  ]);
+});

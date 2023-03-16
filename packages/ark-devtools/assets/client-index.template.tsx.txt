@@ -1,0 +1,13 @@
+/* eslint-disable */
+// @ts-nocheck
+import ReactDOM from 'react-dom';
+import {makeApp} from '@skyslit/ark-frontend';
+import AppCreator from './admin.client.tsx';
+
+makeApp('csr', AppCreator)
+.then((App) => {
+    ReactDOM.render(<App />, document.getElementById('root'));
+})
+.catch((e) => {
+    console.error(e);
+});

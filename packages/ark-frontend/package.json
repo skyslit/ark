@@ -1,0 +1,59 @@
+{
+  "name": "@skyslit/ark-frontend",
+  "version": "2.31.2",
+  "description": "A business framework for building react based frontend application",
+  "main": "./build/index.js",
+  "private": false,
+  "scripts": {
+    "test": "jest --max-workers 1",
+    "start": "jest --watchAll",
+    "build": "tsc"
+  },
+  "author": "Skyslit Network Private Limited",
+  "license": "Apache-2.0",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "devDependencies": {
+    "@babel/core": "^7.12.3",
+    "@babel/plugin-proposal-class-properties": "^7.12.1",
+    "@babel/plugin-syntax-dynamic-import": "^7.8.3",
+    "@babel/preset-env": "^7.12.1",
+    "@babel/preset-react": "^7.12.7",
+    "@babel/preset-typescript": "^7.12.1",
+    "@skyslit/ark-core": "^2.28.1",
+    "@testing-library/react": "^11.2.2",
+    "@types/jest": "^26.0.15",
+    "@types/lodash": "^4.14.168",
+    "@types/react": "^16.0.1",
+    "@types/react-dom": "^16.0.1",
+    "@types/react-router-dom": "^5.1.6",
+    "@types/traverse": "^0.6.32",
+    "axios": "^0.27.2",
+    "core-js": "^3.27.2",
+    "react": "^16.0.1",
+    "react-dom": "^16.0.1",
+    "react-helmet-async": "^1.0.7",
+    "react-router-dom": "5.2.0",
+    "socket.io": "^4.5.4"
+  },
+  "peerDependencies": {
+    "axios": "^0.21.1",
+    "react": "^16.0.1",
+    "react-dom": "^16.0.1",
+    "react-helmet-async": "^1.0.7",
+    "react-router-dom": "^5.2.0"
+  },
+  "dependencies": {
+    "lodash": "^4.17.21",
+    "redux": "^4.0.5",
+    "socket.io-client": "^4.5.4",
+    "traverse": "^0.6.6"
+  },
+  "publishConfig": {
+    "access": "public"
+  }
+}

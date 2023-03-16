@@ -1,0 +1,685 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Parameters": {
+    "ProjectName": {
+      "Type": "String",
+      "Description": "Please enter your project name. e.g. project-phoenix",
+      "MaxLength": 20
+    }
+  },
+  "Metadata": {
+    "AWS::CloudFormation::Designer": {
+      "bac3d5f5-6f51-4f17-845a-9a924f6b4303": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 60,
+          "y": 180
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "439e00c8-098f-4560-9d80-85c1934a5d5a": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 60,
+          "y": 90
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "cebddadb-25a1-4e80-af0b-316a7c532a1c": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 210,
+          "y": 90
+        },
+        "z": 1,
+        "embeds": [],
+        "dependson": ["ec23ac42-fcf7-4734-9711-b72fab1347c2"]
+      },
+      "ec23ac42-fcf7-4734-9711-b72fab1347c2": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 210,
+          "y": 180
+        },
+        "z": 1,
+        "embeds": [],
+        "isassociatedwith": ["5305b1df-87e4-4e47-b293-f2415311c9c0"]
+      },
+      "5305b1df-87e4-4e47-b293-f2415311c9c0": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 300,
+          "y": 90
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "0813ea68-4703-4722-90e8-81e6bc81bdf4": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 420,
+          "y": 150
+        },
+        "z": 1,
+        "embeds": [],
+        "dependson": ["f5cc2783-2504-42f3-9e4c-42ee16be1f26"]
+      },
+      "24d9f4e3-77cf-4602-a5e5-3ba7b74d02a7": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 300,
+          "y": 180
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "664c6aa2-7e70-4c12-b661-0246ba05143f": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 420,
+          "y": 240
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "f5cc2783-2504-42f3-9e4c-42ee16be1f26": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 550,
+          "y": 200
+        },
+        "z": 1,
+        "embeds": [],
+        "isassociatedwith": ["664c6aa2-7e70-4c12-b661-0246ba05143f"]
+      }
+    }
+  },
+  "Resources": {
+    "codeCommit": {
+      "Type": "AWS::CodeCommit::Repository",
+      "Properties": {
+        "RepositoryName": {
+          "Fn::Sub": [
+            "${ProjectNameStr}-repo",
+            {
+              "ProjectNameStr": {
+                "Ref": "ProjectName"
+              }
+            }
+          ]
+        },
+        "Tags": [],
+        "Triggers": []
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "bac3d5f5-6f51-4f17-845a-9a924f6b4303"
+        }
+      }
+    },
+    "imageRepository": {
+      "Type": "AWS::ECR::Repository",
+      "Properties": {
+        "RepositoryName": {
+          "Fn::Sub": [
+            "${ProjectNameStr}-image",
+            {
+              "ProjectNameStr": {
+                "Ref": "ProjectName"
+              }
+            }
+          ]
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "439e00c8-098f-4560-9d80-85c1934a5d5a"
+        }
+      }
+    },
+    "codeBuildPolicy": {
+      "Description": "Setting IAM policy for service role for CodeBuild",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": ["s3:*"],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": [
+                "logs:CreateLogGroup",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Effect": "Allow",
+              "Resource": "*"
+            },
+            {
+              "Action": ["codecommit:GitPull"],
+              "Effect": "Allow",
+              "Resource": [
+                {
+                  "Fn::GetAtt": ["codeCommit", "Arn"]
+                }
+              ]
+            },
+            {
+              "Action": [
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:CompleteLayerUpload",
+                "ecr:GetAuthorizationToken",
+                "ecr:InitiateLayerUpload",
+                "ecr:PutImage",
+                "ecr:UploadLayerPart"
+              ],
+              "Resource": "*",
+              "Effect": "Allow"
+            }
+          ]
+        },
+        "PolicyName": {
+          "Fn::Sub": [
+            "${ProjectNameStr}-code-build-policy",
+            {
+              "ProjectNameStr": {
+                "Ref": "ProjectName"
+              }
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "codeBuildRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Policy",
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "ec23ac42-fcf7-4734-9711-b72fab1347c2"
+        }
+      }
+    },
+    "codeBuildRole": {
+      "Description": "Creating service role in IAM for AWS CodeBuild",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "codebuild.amazonaws.com"
+              }
+            }
+          ]
+        },
+        "Path": "/",
+        "RoleName": {
+          "Fn::Sub": [
+            "${ProjectNameStr}-code-build-role",
+            {
+              "ProjectNameStr": {
+                "Ref": "ProjectName"
+              }
+            }
+          ]
+        }
+      },
+      "Type": "AWS::IAM::Role",
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "5305b1df-87e4-4e47-b293-f2415311c9c0"
+        }
+      }
+    },
+    "codeBuild": {
+      "Type": "AWS::CodeBuild::Project",
+      "Properties": {
+        "Name": {
+          "Fn::Sub": [
+            "${ProjectNameStr}-builder",
+            {
+              "ProjectNameStr": {
+                "Ref": "ProjectName"
+              }
+            }
+          ]
+        },
+        "ServiceRole": {
+          "Ref": "codeBuildRole"
+        },
+        "Artifacts": {
+          "Type": "NO_ARTIFACTS"
+        },
+        "Source": {
+          "Type": "CODECOMMIT",
+          "Location": {
+            "Fn::GetAtt": ["codeCommit", "CloneUrlHttp"]
+          }
+        },
+        "Environment": {
+          "Type": "LINUX_CONTAINER",
+          "ComputeType": "BUILD_GENERAL1_SMALL",
+          "Image": "aws/codebuild/standard:3.0",
+          "PrivilegedMode": true,
+          "EnvironmentVariables": [
+            {
+              "Name": "AWS_DEFAULT_REGION",
+              "Type": "PLAINTEXT",
+              "Value": {
+                "Ref": "AWS::Region"
+              }
+            },
+            {
+              "Name": "AWS_ACCOUNT_ID",
+              "Type": "PLAINTEXT",
+              "Value": {
+                "Ref": "AWS::AccountId"
+              }
+            },
+            {
+              "Name": "IMAGE_REPO_NAME",
+              "Type": "PLAINTEXT",
+              "Value": {
+                "Ref": "imageRepository"
+              }
+            }
+          ]
+        },
+        "BadgeEnabled": true
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "cebddadb-25a1-4e80-af0b-316a7c532a1c"
+        }
+      },
+      "DependsOn": ["codeBuildPolicy"]
+    },
+    "codePipelinePolicy": {
+      "Description": "Setting IAM policy for service role for CodePipeline",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Action": ["iam:PassRole"],
+              "Resource": "*",
+              "Effect": "Allow",
+              "Condition": {
+                "StringEqualsIfExists": {
+                  "iam:PassedToService": [
+                    "cloudformation.amazonaws.com",
+                    "elasticbeanstalk.amazonaws.com",
+                    "ec2.amazonaws.com",
+                    "ecs-tasks.amazonaws.com"
+                  ]
+                }
+              }
+            },
+            {
+              "Action": [
+                "codecommit:CancelUploadArchive",
+                "codecommit:GetBranch",
+                "codecommit:GetCommit",
+                "codecommit:GetRepository",
+                "codecommit:GetUploadArchiveStatus",
+                "codecommit:UploadArchive"
+              ],
+              "Resource": "*",
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "codedeploy:CreateDeployment",
+                "codedeploy:GetApplication",
+                "codedeploy:GetApplicationRevision",
+                "codedeploy:GetDeployment",
+                "codedeploy:GetDeploymentConfig",
+                "codedeploy:RegisterApplicationRevision"
+              ],
+              "Resource": "*",
+              "Effect": "Allow"
+            },
+            {
+              "Action": ["codestar-connections:UseConnection"],
+              "Resource": "*",
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "elasticbeanstalk:*",
+                "ec2:*",
+                "elasticloadbalancing:*",
+                "autoscaling:*",
+                "cloudwatch:*",
+                "s3:*",
+                "sns:*",
+                "cloudformation:*",
+                "rds:*",
+                "sqs:*",
+                "ecs:*"
+              ],
+              "Resource": "*",
+              "Effect": "Allow"
+            },
+            {
+              "Action": ["lambda:InvokeFunction", "lambda:ListFunctions"],
+              "Resource": "*",
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "opsworks:CreateDeployment",
+                "opsworks:DescribeApps",
+                "opsworks:DescribeCommands",
+                "opsworks:DescribeDeployments",
+                "opsworks:DescribeInstances",
+                "opsworks:DescribeStacks",
+                "opsworks:UpdateApp",
+                "opsworks:UpdateStack"
+              ],
+              "Resource": "*",
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "cloudformation:CreateStack",
+                "cloudformation:DeleteStack",
+                "cloudformation:DescribeStacks",
+                "cloudformation:UpdateStack",
+                "cloudformation:CreateChangeSet",
+                "cloudformation:DeleteChangeSet",
+                "cloudformation:DescribeChangeSet",
+                "cloudformation:ExecuteChangeSet",
+                "cloudformation:SetStackPolicy",
+                "cloudformation:ValidateTemplate"
+              ],
+              "Resource": "*",
+              "Effect": "Allow"
+            },
+            {
+              "Action": [
+                "codebuild:BatchGetBuilds",
+                "codebuild:StartBuild",
+                "codebuild:BatchGetBuildBatches",
+                "codebuild:StartBuildBatch"
+              ],
+              "Resource": "*",
+              "Effect": "Allow"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "devicefarm:ListProjects",
+                "devicefarm:ListDevicePools",
+                "devicefarm:GetRun",
+                "devicefarm:GetUpload",
+                "devicefarm:CreateUpload",
+                "devicefarm:ScheduleRun"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "servicecatalog:ListProvisioningArtifacts",
+                "servicecatalog:CreateProvisioningArtifact",
+                "servicecatalog:DescribeProvisioningArtifact",
+                "servicecatalog:DeleteProvisioningArtifact",
+                "servicecatalog:UpdateProduct"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": ["cloudformation:ValidateTemplate"],
+              "Resource": "*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": ["ecr:DescribeImages"],
+              "Resource": "*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "states:DescribeExecution",
+                "states:DescribeStateMachine",
+                "states:StartExecution"
+              ],
+              "Resource": "*"
+            },
+            {
+              "Effect": "Allow",
+              "Action": [
+                "appconfig:StartDeployment",
+                "appconfig:StopDeployment",
+                "appconfig:GetDeployment"
+              ],
+              "Resource": "*"
+            }
+          ]
+        },
+        "PolicyName": {
+          "Fn::Sub": [
+            "${ProjectNameStr}-code-pipeline-policy",
+            {
+              "ProjectNameStr": {
+                "Ref": "ProjectName"
+              }
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "codePipelineRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Policy",
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "f5cc2783-2504-42f3-9e4c-42ee16be1f26"
+        }
+      }
+    },
+    "codePipelineRole": {
+      "Description": "Creating service role in IAM for AWS CodePipeline",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "codepipeline.amazonaws.com"
+              }
+            }
+          ]
+        },
+        "Path": "/",
+        "RoleName": {
+          "Fn::Sub": [
+            "${ProjectNameStr}-code-pipeline-role",
+            {
+              "ProjectNameStr": {
+                "Ref": "ProjectName"
+              }
+            }
+          ]
+        }
+      },
+      "Type": "AWS::IAM::Role",
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "664c6aa2-7e70-4c12-b661-0246ba05143f"
+        }
+      }
+    },
+    "pipelineBucket": {
+      "Type": "AWS::S3::Bucket",
+      "Properties": {
+        "BucketName": {
+          "Fn::Sub": [
+            "${ProjectNameStr}-pipeline-bucket",
+            {
+              "ProjectNameStr": {
+                "Ref": "ProjectName"
+              }
+            }
+          ]
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "24d9f4e3-77cf-4602-a5e5-3ba7b74d02a7"
+        }
+      }
+    },
+    "codePipeline": {
+      "Type": "AWS::CodePipeline::Pipeline",
+      "Properties": {
+        "Name": {
+          "Fn::Sub": [
+            "${ProjectNameStr}-pipeline",
+            {
+              "ProjectNameStr": {
+                "Ref": "ProjectName"
+              }
+            }
+          ]
+        },
+        "ArtifactStore": {
+          "Type": "S3",
+          "Location": {
+            "Ref": "pipelineBucket"
+          }
+        },
+        "RoleArn": {
+          "Fn::GetAtt": ["codePipelineRole", "Arn"]
+        },
+        "Stages": [
+          {
+            "Name": "Source",
+            "Actions": [
+              {
+                "Name": "SourceAction",
+                "ActionTypeId": {
+                  "Category": "Source",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeCommit"
+                },
+                "OutputArtifacts": [
+                  {
+                    "Name": "SourceOutput"
+                  }
+                ],
+                "Configuration": {
+                  "RepositoryName": {
+                    "Fn::GetAtt": ["codeCommit", "Name"]
+                  },
+                  "BranchName": "master",
+                  "PollForSourceChanges": false,
+                  "OutputArtifactFormat": "CODE_ZIP"
+                },
+                "RunOrder": 1
+              }
+            ]
+          },
+          {
+            "Name": "Build",
+            "Actions": [
+              {
+                "Name": "BuildAction",
+                "ActionTypeId": {
+                  "Category": "Build",
+                  "Owner": "AWS",
+                  "Version": "1",
+                  "Provider": "CodeBuild"
+                },
+                "OutputArtifacts": [
+                  {
+                    "Name": "BuildArtifact"
+                  }
+                ],
+                "InputArtifacts": [
+                  {
+                    "Name": "SourceOutput"
+                  }
+                ],
+                "Configuration": {
+                  "ProjectName": {
+                    "Ref": "codeBuild"
+                  },
+                  "BatchEnabled": false
+                },
+                "RunOrder": 1
+              }
+            ]
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "0813ea68-4703-4722-90e8-81e6bc81bdf4"
+        }
+      },
+      "DependsOn": ["codePipelinePolicy"]
+    }
+  },
+  "Outputs": {
+    "GitCloneUrl": {
+      "Description": "Clone source code from here",
+      "Value": {
+        "Fn::GetAtt": ["codeCommit", "CloneUrlHttp"]
+      }
+    },
+    "ImageRepoName": {
+      "Value": {
+        "Ref": "imageRepository"
+      }
+    },
+    "AWSRegion": {
+      "Value": {
+        "Ref": "AWS::Region"
+      }
+    },
+    "AWSAccountId": {
+      "Value": {
+        "Ref": "AWS::AccountId"
+      }
+    }
+  }
+}

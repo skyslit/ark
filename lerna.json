@@ -1,0 +1,17 @@
+{
+  "packages": [
+    "packages/*"
+  ],
+  "command": {
+    "version": {
+      "allowBranch": "master"
+    },
+    "publish": {
+      "ignoreChanges": [
+        "*.md"
+      ],
+      "message": "chore(release): publish"
+    }
+  },
+  "version": "2.31.5"
+}

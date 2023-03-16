@@ -1,0 +1,675 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Parameters": {
+    "VPCID": {
+      "Type": "AWS::EC2::VPC::Id",
+      "Description": "Please choose the target VPC"
+    },
+    "Subnets": {
+      "Type": "List<AWS::EC2::Subnet::Id>",
+      "Description": "Please choose preferred subnets (public)"
+    }
+  },
+  "Metadata": {
+    "AWS::CloudFormation::Designer": {
+      "dbdf8573-365d-4db7-83d5-b6b74e153de2": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 780,
+          "y": 90
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "963407ab-5a04-46d3-92db-c31e3fc6533f": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 240,
+          "y": 120
+        },
+        "z": 1,
+        "embeds": [],
+        "dependson": [
+          "3f53ec46-08db-4fa8-90ff-91c2bf64a7ef",
+          "02f17461-eeec-4b55-8a74-26fc88a7d2df",
+          "b7cf91a3-c7b9-46fe-be92-03d69a8a411e",
+          "6f6365a5-63c8-4af3-b20f-523fcb8efa8a"
+        ]
+      },
+      "77040f03-aa43-4243-b0b2-2bc5d41705f1": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 900,
+          "y": 90
+        },
+        "z": 1,
+        "embeds": [],
+        "dependson": ["60dadbce-9b7f-469e-be8e-c9aa6c714536"]
+      },
+      "6a80220f-ef52-4539-a876-8192cec0556f": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 330,
+          "y": 90
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "8e4f9f47-bff9-45ec-80fe-df0060491383": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 450,
+          "y": 210
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "3f53ec46-08db-4fa8-90ff-91c2bf64a7ef": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 450,
+          "y": 90
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "76130ef7-94cd-4ef7-843e-48fe4c0277b0": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 570,
+          "y": 90
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "02f17461-eeec-4b55-8a74-26fc88a7d2df": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 690,
+          "y": 90
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "b7cf91a3-c7b9-46fe-be92-03d69a8a411e": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 600,
+          "y": 240
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "6f6365a5-63c8-4af3-b20f-523fcb8efa8a": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 330,
+          "y": 180
+        },
+        "z": 1,
+        "embeds": [],
+        "isassociatedwith": [
+          "b7cf91a3-c7b9-46fe-be92-03d69a8a411e",
+          "6a80220f-ef52-4539-a876-8192cec0556f"
+        ]
+      },
+      "1a8a47f5-ce00-4323-ac3e-37cdc5b85225": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 130,
+          "y": 90
+        },
+        "z": 1,
+        "embeds": []
+      },
+      "60dadbce-9b7f-469e-be8e-c9aa6c714536": {
+        "size": {
+          "width": 60,
+          "height": 60
+        },
+        "position": {
+          "x": 690,
+          "y": 180
+        },
+        "z": 1,
+        "embeds": [],
+        "isassociatedwith": ["1a8a47f5-ce00-4323-ac3e-37cdc5b85225"]
+      }
+    }
+  },
+  "Resources": {
+    "fileSystem": {
+      "Type": "AWS::EFS::FileSystem",
+      "Properties": {
+        "BackupPolicy": {
+          "Status": "DISABLED"
+        },
+        "LifecyclePolicies": [
+          {
+            "TransitionToIA": "AFTER_30_DAYS"
+          }
+        ],
+        "PerformanceMode": "generalPurpose",
+        "ThroughputMode": "bursting"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "b7cf91a3-c7b9-46fe-be92-03d69a8a411e"
+        }
+      }
+    },
+    "fileSystemMountTarget": {
+      "Type": "AWS::EFS::MountTarget",
+      "Properties": {
+        "FileSystemId": {
+          "Ref": "fileSystem"
+        },
+        "SecurityGroups": [
+          {
+            "Ref": "securityGroup"
+          }
+        ],
+        "SubnetId": {
+          "Fn::Select": [
+            "0",
+            {
+              "Ref": "Subnets"
+            }
+          ]
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "6f6365a5-63c8-4af3-b20f-523fcb8efa8a"
+        }
+      }
+    },
+    "ecsTaskExecutionPolicy": {
+      "Description": "Setting IAM policy for service role for CodePipeline",
+      "Properties": {
+        "PolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Action": [
+                "ecr:GetAuthorizationToken",
+                "ecr:BatchCheckLayerAvailability",
+                "ecr:GetDownloadUrlForLayer",
+                "ecr:BatchGetImage",
+                "logs:CreateLogStream",
+                "logs:PutLogEvents"
+              ],
+              "Resource": "*"
+            }
+          ]
+        },
+        "PolicyName": {
+          "Fn::Sub": [
+            "${ProjectNameStr}-ecs-task-execution-policy",
+            {
+              "ProjectNameStr": {
+                "Ref": "AWS::StackName"
+              }
+            }
+          ]
+        },
+        "Roles": [
+          {
+            "Ref": "ecsTaskExecutionRole"
+          }
+        ]
+      },
+      "Type": "AWS::IAM::Policy",
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "60dadbce-9b7f-469e-be8e-c9aa6c714536"
+        }
+      }
+    },
+    "ecsTaskExecutionRole": {
+      "Description": "Creating service role in IAM for AWS ECS",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Action": "sts:AssumeRole",
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "ecs-tasks.amazonaws.com"
+              }
+            }
+          ]
+        },
+        "Path": "/",
+        "RoleName": {
+          "Fn::Sub": [
+            "${ProjectNameStr}-ecs-task-execution-role",
+            {
+              "ProjectNameStr": {
+                "Ref": "AWS::StackName"
+              }
+            }
+          ]
+        }
+      },
+      "Type": "AWS::IAM::Role",
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "1a8a47f5-ce00-4323-ac3e-37cdc5b85225"
+        }
+      }
+    },
+    "taskDef": {
+      "Type": "AWS::ECS::TaskDefinition",
+      "Properties": {
+        "RequiresCompatibilities": ["FARGATE"],
+        "ExecutionRoleArn": {
+          "Fn::GetAtt": ["ecsTaskExecutionRole", "Arn"]
+        },
+        "ContainerDefinitions": [
+          {
+            "Image": "nginx:latest",
+            "MountPoints": [
+              {
+                "ContainerPath": "/app/user-uploads",
+                "ReadOnly": false,
+                "SourceVolume": "efs-mnt"
+              }
+            ],
+            "Name": "web-app-container",
+            "PortMappings": [
+              {
+                "ContainerPort": 80,
+                "HostPort": 80
+              }
+            ],
+            "Privileged": false
+          }
+        ],
+        "Cpu": "256",
+        "Family": {
+          "Fn::Sub": [
+            "${ProjectNameStr}-task-def",
+            {
+              "ProjectNameStr": {
+                "Ref": "AWS::StackName"
+              }
+            }
+          ]
+        },
+        "Memory": "512",
+        "NetworkMode": "awsvpc",
+        "Volumes": [
+          {
+            "Name": "efs-mnt",
+            "EFSVolumeConfiguration": {
+              "FilesystemId": {
+                "Ref": "fileSystem"
+              },
+              "RootDirectory": "/"
+            }
+          }
+        ]
+      },
+      "DependsOn": ["ecsTaskExecutionPolicy"],
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "77040f03-aa43-4243-b0b2-2bc5d41705f1"
+        }
+      }
+    },
+    "ecsCluster": {
+      "Type": "AWS::ECS::Cluster",
+      "Properties": {
+        "ClusterName": {
+          "Fn::Sub": [
+            "${ProjectNameStr}-ecs-cluster",
+            {
+              "ProjectNameStr": {
+                "Ref": "AWS::StackName"
+              }
+            }
+          ]
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "dbdf8573-365d-4db7-83d5-b6b74e153de2"
+        }
+      }
+    },
+    "loadBalancer": {
+      "Type": "AWS::ElasticLoadBalancingV2::LoadBalancer",
+      "Properties": {
+        "IpAddressType": "ipv4",
+        "Name": {
+          "Fn::Sub": [
+            "${ProjectNameStr}-lb",
+            {
+              "ProjectNameStr": {
+                "Ref": "AWS::StackName"
+              }
+            }
+          ]
+        },
+        "Scheme": "internet-facing",
+        "Subnets": {
+          "Ref": "Subnets"
+        },
+        "SecurityGroups": [
+          {
+            "Ref": "loadBalancerSecurityGroup"
+          }
+        ],
+        "Type": "application"
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "3f53ec46-08db-4fa8-90ff-91c2bf64a7ef"
+        }
+      }
+    },
+    "httpListener": {
+      "Type": "AWS::ElasticLoadBalancingV2::Listener",
+      "Properties": {
+        "Port": 80,
+        "Protocol": "HTTP",
+        "LoadBalancerArn": {
+          "Ref": "loadBalancer"
+        },
+        "DefaultActions": [
+          {
+            "Type": "fixed-response",
+            "Order": 50000,
+            "FixedResponseConfig": {
+              "ContentType": "text/plain",
+              "MessageBody": "NOT_FOUND",
+              "StatusCode": 404
+            }
+          }
+        ]
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "76130ef7-94cd-4ef7-843e-48fe4c0277b0"
+        }
+      }
+    },
+    "httpListenerRule": {
+      "Type": "AWS::ElasticLoadBalancingV2::ListenerRule",
+      "Properties": {
+        "Conditions": [
+          {
+            "Field": "path-pattern",
+            "PathPatternConfig": {
+              "Values": ["/**"]
+            }
+          }
+        ],
+        "Actions": [
+          {
+            "Type": "forward",
+            "Order": 1,
+            "TargetGroupArn": {
+              "Ref": "targetGroup"
+            }
+          }
+        ],
+        "ListenerArn": {
+          "Ref": "httpListener"
+        },
+        "Priority": 1
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "02f17461-eeec-4b55-8a74-26fc88a7d2df"
+        }
+      }
+    },
+    "targetGroup": {
+      "Type": "AWS::ElasticLoadBalancingV2::TargetGroup",
+      "Properties": {
+        "Name": {
+          "Fn::Sub": [
+            "${ProjectNameStr}-target-group",
+            {
+              "ProjectNameStr": {
+                "Ref": "AWS::StackName"
+              }
+            }
+          ]
+        },
+        "Port": 80,
+        "Protocol": "HTTP",
+        "TargetType": "ip",
+        "VpcId": {
+          "Ref": "VPCID"
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "8e4f9f47-bff9-45ec-80fe-df0060491383"
+        }
+      }
+    },
+    "appService": {
+      "Type": "AWS::ECS::Service",
+      "Properties": {
+        "LaunchType": "FARGATE",
+        "Cluster": {
+          "Ref": "ecsCluster"
+        },
+        "PlatformVersion": "1.4.0",
+        "ServiceName": {
+          "Fn::Sub": [
+            "${ProjectNameStr}-service",
+            {
+              "ProjectNameStr": {
+                "Ref": "AWS::StackName"
+              }
+            }
+          ]
+        },
+        "SchedulingStrategy": "REPLICA",
+        "DesiredCount": 1,
+        "DeploymentController": {
+          "Type": "ECS"
+        },
+        "TaskDefinition": {
+          "Ref": "taskDef"
+        },
+        "LoadBalancers": [
+          {
+            "ContainerName": "web-app-container",
+            "ContainerPort": 80,
+            "TargetGroupArn": {
+              "Ref": "targetGroup"
+            }
+          }
+        ],
+        "NetworkConfiguration": {
+          "AwsvpcConfiguration": {
+            "AssignPublicIp": "ENABLED",
+            "SecurityGroups": [
+              {
+                "Fn::GetAtt": ["securityGroup", "GroupId"]
+              }
+            ],
+            "Subnets": [
+              {
+                "Fn::Select": [
+                  "0",
+                  {
+                    "Ref": "Subnets"
+                  }
+                ]
+              }
+            ]
+          }
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "963407ab-5a04-46d3-92db-c31e3fc6533f"
+        }
+      },
+      "DependsOn": [
+        "loadBalancer",
+        "httpListenerRule",
+        "fileSystem",
+        "fileSystemMountTarget"
+      ]
+    },
+    "httpIngress": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "DependsOn": "securityGroup",
+      "Properties": {
+        "GroupId": {
+          "Ref": "securityGroup"
+        },
+        "CidrIp": "0.0.0.0/0",
+        "Description": "Allow HTTP",
+        "FromPort": 80,
+        "IpProtocol": "tcp",
+        "ToPort": 80
+      }
+    },
+    "efsIngress": {
+      "Type": "AWS::EC2::SecurityGroupIngress",
+      "DependsOn": "securityGroup",
+      "Properties": {
+        "GroupId": {
+          "Ref": "securityGroup"
+        },
+        "SourceSecurityGroupId": { "Ref": "securityGroup" },
+        "Description": "Allow EFS (NFS)",
+        "FromPort": 2049,
+        "IpProtocol": "tcp",
+        "ToPort": 2049
+      }
+    },
+    "securityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": {
+          "Fn::Sub": [
+            "Security group for ${ProjectNameStr}",
+            {
+              "ProjectNameStr": {
+                "Ref": "AWS::StackName"
+              }
+            }
+          ]
+        },
+        "GroupName": {
+          "Fn::Sub": [
+            "${ProjectNameStr}-sg",
+            {
+              "ProjectNameStr": {
+                "Ref": "AWS::StackName"
+              }
+            }
+          ]
+        },
+        "VpcId": {
+          "Ref": "VPCID"
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "6a80220f-ef52-4539-a876-8192cec0556f"
+        }
+      }
+    },
+    "loadBalancerSecurityGroup": {
+      "Type": "AWS::EC2::SecurityGroup",
+      "Properties": {
+        "GroupDescription": {
+          "Fn::Sub": [
+            "Security group for ${ProjectNameStr}",
+            {
+              "ProjectNameStr": {
+                "Ref": "AWS::StackName"
+              }
+            }
+          ]
+        },
+        "GroupName": {
+          "Fn::Sub": [
+            "${ProjectNameStr}-lb-sg",
+            {
+              "ProjectNameStr": {
+                "Ref": "AWS::StackName"
+              }
+            }
+          ]
+        },
+        "SecurityGroupIngress": [
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow HTTP",
+            "FromPort": 80,
+            "IpProtocol": "tcp",
+            "ToPort": 80
+          },
+          {
+            "CidrIp": "0.0.0.0/0",
+            "Description": "Allow HTTPS",
+            "FromPort": 443,
+            "IpProtocol": "tcp",
+            "ToPort": 443
+          }
+        ],
+        "VpcId": {
+          "Ref": "VPCID"
+        }
+      },
+      "Metadata": {
+        "AWS::CloudFormation::Designer": {
+          "id": "6a80220f-ef52-4539-a876-8192cec0556f"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "URL": {
+      "Description": "Access the application using the URL",
+      "Value": {
+        "Fn::GetAtt": ["loadBalancer", "DNSName"]
+      }
+    }
+  }
+}

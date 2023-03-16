@@ -1,6 +1,6 @@
 {
   "name": "@skyslit/ark-devtools",
-  "version": "2.31.5",
+  "version": "2.31.6",
   "description": "DevTools and Utilities that power up Ark based Software Applications",
   "main": "./build/index.js",
   "private": false,

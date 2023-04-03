@@ -9,6 +9,7 @@ import {
   ServiceResponse,
   useEnv,
   getRuntimeVars,
+  setDefaultEnv,
 } from '@skyslit/ark-core';
 import expressApp, {
   CookieOptions,
@@ -247,6 +248,10 @@ declare global {
     } & Databases;
   }
 }
+
+setDefaultEnv({
+  APP_INFO_BASE_PATH: '',
+});
 
 /* -------------------------------------------------------------------------- */
 /*                                  Utilities                                 */
@@ -1714,7 +1719,13 @@ export const Backend = createPointer<Partial<Ark.Backend>>(
                 systemInfo: {
                   version: useEnv('APP_INFO_VERSION'),
                   buildNumber: useEnv('APP_INFO_BUILD_NUMBER'),
+                  basePath: useEnv('APP_INFO_BASE_PATH'),
                 },
+                passThroughVariables: Object.assign(
+                  {},
+                  getPassThroughPayload(),
+                  (opts?.args?.req as any)?.passThroughVariables || {}
+                ),
               });
             });
           })
@@ -3210,4 +3221,25 @@ function loadSimulatedUser(): { token: string; user: any; hasUser: boolean } {
     user,
     hasUser: HAS_SIM_USER,
   };
+}
+
+const PASS_THRU_ENV_VARS: string[] = ['APP_INFO_BASE_PATH'];
+
+/**
+ * Registers an environment variable as a pass through variable for frontend hydration
+ * @param name Name of the environment variable to pass through to frontend
+ */
+export function passThroughEnvVar(name: string) {
+  if (PASS_THRU_ENV_VARS.indexOf(name) < 0) {
+    PASS_THRU_ENV_VARS.push(name);
+  }
+}
+
+export function getPassThroughPayload() {
+  return PASS_THRU_ENV_VARS.reduce((acc, key) => {
+    return {
+      ...acc,
+      [key]: useEnv(key) || undefined,
+    };
+  }, {});
 }

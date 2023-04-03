@@ -12,6 +12,7 @@ import {
   CMS,
   CMSLog,
   useEnv,
+  setDefaultEnv,
 } from '@skyslit/ark-core';
 import axios, { AxiosRequestConfig } from 'axios';
 import { HelmetProvider } from 'react-helmet-async';
@@ -390,7 +391,15 @@ export function makeApp(
         const context: any = {};
 
         React.useEffect(() => {
-          main.invoke();
+          main.invoke().then((v) => {
+            try {
+              if (v?.data?.meta?.passThroughVariables) {
+                setDefaultEnv(v?.data?.meta?.passThroughVariables || {});
+              }
+            } catch (e) {
+              console.error(e);
+            }
+          });
         }, []);
 
         if (!main.response) {

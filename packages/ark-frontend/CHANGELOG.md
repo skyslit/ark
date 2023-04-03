@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.32.0](https://github.com/skyslit/ark/compare/v2.31.7...v2.32.0) (2023-04-03)
+
+
+### Features
+
+* added support for passthru env variable ([f7e902b](https://github.com/skyslit/ark/commit/f7e902b61eae6c1e364aa6c3df6e0195b05107b0))
+
+
+
+
+
 ## 2.31.7 (2023-03-16)
 
 

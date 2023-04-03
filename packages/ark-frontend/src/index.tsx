@@ -396,10 +396,12 @@ export function makeApp(
 
         React.useEffect(() => {
           try {
-            if (main?.response?.data?.meta?.passThroughVariables) {
-              setDefaultEnv(
-                main?.response?.data?.meta?.passThroughVariables || {}
-              );
+            if (main.hasInitialized === true) {
+              if (main?.response?.data?.meta?.passThroughVariables) {
+                setDefaultEnv(
+                  main?.response?.data?.meta?.passThroughVariables || {}
+                );
+              }
             }
           } catch (e) {
             console.error(e);

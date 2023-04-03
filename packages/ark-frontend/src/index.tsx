@@ -391,16 +391,20 @@ export function makeApp(
         const context: any = {};
 
         React.useEffect(() => {
-          main.invoke().then((v) => {
-            try {
-              if (v?.data?.meta?.passThroughVariables) {
-                setDefaultEnv(v?.data?.meta?.passThroughVariables || {});
-              }
-            } catch (e) {
-              console.error(e);
-            }
-          });
+          main.invoke();
         }, []);
+
+        React.useEffect(() => {
+          try {
+            if (main?.response?.data?.meta?.passThroughVariables) {
+              setDefaultEnv(
+                main?.response?.data?.meta?.passThroughVariables || {}
+              );
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }, [main.hasInitialized]);
 
         if (!main.response) {
           return <div>Application booting up...</div>;

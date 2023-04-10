@@ -3223,7 +3223,10 @@ function loadSimulatedUser(): { token: string; user: any; hasUser: boolean } {
   };
 }
 
-const PASS_THRU_ENV_VARS: string[] = ['APP_INFO_BASE_PATH'];
+const PASS_THRU_ENV_VARS: string[] = [
+  'APP_INFO_BASE_PATH',
+  'COMPASS_DEMO_MODE',
+];
 
 /**
  * Registers an environment variable as a pass through variable for frontend hydration

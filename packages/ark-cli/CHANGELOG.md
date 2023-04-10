@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.32.2](https://github.com/skyslit/ark/compare/v2.32.1...v2.32.2) (2023-04-10)
+
+**Note:** Version bump only for package fpz
+
+
+
+
+
 ## [2.32.1](https://github.com/skyslit/ark/compare/v2.32.0...v2.32.1) (2023-04-03)
 
 **Note:** Version bump only for package fpz

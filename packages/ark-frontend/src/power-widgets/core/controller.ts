@@ -1,4 +1,8 @@
+import axios from 'axios';
+
 export type Item = {
+  name: string;
+  parentPath: string;
   path: string;
   type: string;
   resolved: boolean;
@@ -39,15 +43,62 @@ export class Controller {
   } = {};
 
   async fetch(ns: string, path: string): Promise<Response> {
-    return {
-      currentDir: {
+    const res = await axios.post(
+      '/___service/main/powerserver___fetch-content',
+      {
+        namespace: ns,
         path,
-        type: 'root',
-        resolved: true,
-        meta: {},
-      },
-      items: [],
-    };
+      }
+    );
+    console.log('res', res.data);
+
+    return res.data.meta;
+    // switch (path) {
+    //   case '/product 1': {
+    //     return {
+    //       currentDir: {
+    //         name: 'product 1',
+    //         parentPath: '/',
+    //         path: '/product 1',
+    //         meta: {},
+    //         resolved: true,
+    //         type: 'dir'
+    //       },
+    //       items: [
+    //         {
+    //           name: 'option 1',
+    //           parentPath: '/product 1',
+    //           path: '/product 1/option 1',
+    //           meta: {},
+    //           resolved: true,
+    //           type: 'dir'
+    //         }
+    //       ],
+    //     }
+    //   }
+    //   default: {
+    //     return {
+    //       currentDir: {
+    //         name: 'home',
+    //         path,
+    //         parentPath: null,
+    //         type: 'root',
+    //         resolved: true,
+    //         meta: {},
+    //       },
+    //       items: [
+    //         {
+    //           name: 'product 1',
+    //           parentPath: '/',
+    //           path: '/product 1',
+    //           meta: {},
+    //           resolved: true,
+    //           type: 'dir'
+    //         }
+    //       ],
+    //     };
+    //   }
+    // }
   }
 
   getNamespace(ns: string) {

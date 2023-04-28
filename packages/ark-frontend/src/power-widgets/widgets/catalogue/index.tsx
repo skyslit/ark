@@ -74,13 +74,18 @@ function createCatalogue(props: PropType): CatalogueApi {
     }
 
     return controlledPath;
-  }, [isControlledComponent]);
+  }, [controlledPath, isControlledComponent]);
+
+  console.log('path', path);
 
   const [currentDir, setCurrentDir] = React.useState<Item>(null);
 
   const setPath = React.useCallback(
     (path: string) => {
-      props.onPathChange(path);
+      if (props.onPathChange) {
+        props.onPathChange(path);
+      }
+
       if (isControlledComponent === false) {
         setControlledPath(path);
       }
@@ -120,13 +125,32 @@ export function useCatalogue(): CatalogueApi {
   return React.useContext(CatalogueContext);
 }
 
+export function BrowserView() {
+  const api = useCatalogue();
+
+  return (
+    <>
+      {api.items.map((item) => {
+        return (
+          <button onClick={() => api.setPath(item.path)} key={item.name}>
+            {item.name}
+          </button>
+        );
+      })}
+      <div style={{ marginTop: 20 }}>
+        <button>Add Item</button>
+      </div>
+    </>
+  );
+}
+
 export function Catalogue(props: PropType) {
   const api = createCatalogue(props);
 
   return (
     <CatalogueContext.Provider value={api}>
       <div data-testid={'test-ns'} className="ark__catalogue">
-        {JSON.stringify(api.currentDir)}
+        <BrowserView />
       </div>
     </CatalogueContext.Provider>
   );

@@ -172,6 +172,14 @@ type DynamicsServerConfig = {
   dbName?: string;
 };
 
+type PowerServerConfig = {
+  fetchContentServiceId?: string;
+  addItemServiceId?: string;
+  fetchContentRule?: RuleDefinition;
+  addItemRule?: RuleDefinition;
+  dbName?: string;
+};
+
 declare global {
   // eslint-disable-next-line no-unused-vars
   namespace Express {
@@ -215,6 +223,7 @@ declare global {
         htmlFileName?: string
       ) => WebAppRenderer;
       enableDynamicsServer: (conf?: DynamicsServerConfig) => void;
+      enablePowerServer: (conf?: PowerServerConfig) => void;
       useRemoteConfig: (
         initialState?: Partial<RemoteConfig>,
         dbName?: string
@@ -545,6 +554,7 @@ function createWebAppRenderer(
             initialState || {},
             serviceState || {}
           ),
+          // @ts-ignore
           helmetContext,
         })
           .then((App) => {
@@ -557,7 +567,7 @@ function createWebAppRenderer(
             let headContent: string[] = [];
 
             try {
-              headContent = Object.keys(helmetContext.helmet).reduce(
+              headContent = Object.keys(helmetContext?.helmet || {}).reduce(
                 (acc, item) => {
                   let c: string = null;
                   try {
@@ -1876,6 +1886,162 @@ export const Backend = createPointer<Partial<Ark.Backend>>(
               ).exec();
 
               return opts.success({ status: 'success' }, []);
+            });
+          })
+        );
+      }
+    },
+    enablePowerServer: (conf?) => {
+      if (!conf) {
+        conf = {};
+      }
+
+      if (!conf.fetchContentServiceId) {
+        conf.fetchContentServiceId = 'powerserver___fetch-content';
+      }
+
+      if (!conf.addItemServiceId) {
+        conf.addItemServiceId = 'powerserver___add-items';
+      }
+
+      if (!conf.fetchContentRule) {
+        conf.fetchContentRule = (options) => options.allow();
+      }
+
+      if (!conf.dbName) {
+        conf.dbName = 'default';
+      }
+
+      const hasInitialized: boolean = context.getData<boolean>(
+        moduleId,
+        'power-server://hasInitialized',
+        false
+      );
+
+      if (!hasInitialized) {
+        context.setData<boolean>(
+          moduleId,
+          'power-server://hasInitialized',
+          true
+        );
+
+        const useService = useServiceCreator(moduleId, context);
+
+        /**
+         * Import db connection
+         */
+        const mongooseConnection: Connection = context.getData(
+          'default',
+          `db/${conf.dbName}`,
+          null
+        );
+
+        if (!mongooseConnection) {
+          throw new Error(
+            "Looks like you're trying to enablePowerServer before the database is available, or have you actually configured the database connection?"
+          );
+        }
+
+        const PowerWidgetNavItems = mongooseConnection.model<Document>(
+          '__power_nav_items',
+          new Schema({
+            namespace: {
+              type: String,
+              required: true,
+              index: true,
+            },
+            name: {
+              type: String,
+            },
+            parentPath: {
+              type: String,
+              index: true,
+            },
+            path: {
+              type: String,
+            },
+            type: {
+              type: String,
+            },
+            meta: {
+              type: Object,
+            },
+          })
+        );
+
+        useService(
+          defineService(conf.fetchContentServiceId, (opts) => {
+            opts.defineValidator(
+              Joi.object({
+                namespace: Joi.string().required(),
+                path: Joi.string(),
+              })
+            );
+
+            opts.defineRule(conf.fetchContentRule);
+
+            opts.defineLogic(async (opts) => {
+              const { namespace, path } = opts.args.input;
+              const res = {
+                currentDir: null,
+                items: [],
+              };
+
+              if (path === '/') {
+                res.currentDir = {
+                  name: 'home',
+                  path: '/',
+                  parentPath: null,
+                  type: 'root',
+                  resolved: true,
+                  meta: {},
+                };
+              } else {
+                res.currentDir = await PowerWidgetNavItems.findOne({
+                  namespace,
+                  path,
+                });
+              }
+
+              res.items = await PowerWidgetNavItems.find({
+                namespace,
+                parentPath: path,
+              });
+
+              return opts.success(res);
+            });
+          })
+        );
+
+        useService(
+          defineService(conf.addItemServiceId, (opts) => {
+            opts.defineValidator(
+              Joi.object({
+                namespace: Joi.string().required(),
+                path: Joi.string(),
+              })
+            );
+
+            opts.defineRule(conf.addItemRule);
+
+            opts.defineLogic(async (opts) => {
+              const { namespace, path } = opts.args.input;
+              const res = {
+                currentDir: null,
+                items: [],
+              };
+
+              res.currentDir = await PowerWidgetNavItems.findOne({
+                namespace,
+                path,
+              });
+
+              res.items = await PowerWidgetNavItems.find({
+                namespace,
+                parentPath: path,
+              });
+
+              return opts.success(res);
             });
           })
         );

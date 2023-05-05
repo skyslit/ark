@@ -3,6 +3,7 @@ FROM public.ecr.aws/skyslit/node:14.16-slim
 WORKDIR /app
 ENV PATH /app/node_modules/.bin:$PATH
 
+RUN echo "deb http://archive.debian.org/debian stretch main" > /etc/apt/sources.list
 RUN apt-get update -y
 RUN apt-get install python -y
 RUN apt-get install build-essential -y

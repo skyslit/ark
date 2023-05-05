@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.32.3](https://github.com/skyslit/ark/compare/v2.32.2...v2.32.3) (2023-05-05)
+
+
+### Bug Fixes
+
+* issue with Docker build ([fcb8034](https://github.com/skyslit/ark/commit/fcb8034cf2fe04da6815208f839cc2901b8956a1))
+
+
+
+
+
 ## [2.32.2](https://github.com/skyslit/ark/compare/v2.32.1...v2.32.2) (2023-04-10)
 
 **Note:** Version bump only for package fpz

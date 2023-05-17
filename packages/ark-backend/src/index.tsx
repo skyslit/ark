@@ -175,8 +175,12 @@ type DynamicsServerConfig = {
 type PowerServerConfig = {
   fetchContentServiceId?: string;
   addItemServiceId?: string;
+  removeItemsServiceId?: string;
+  updateItemsServiceId?: string;
   fetchContentRule?: RuleDefinition;
   addItemRule?: RuleDefinition;
+  removeItemsRule?: RuleDefinition;
+  updateItemsRule?: RuleDefinition;
   dbName?: string;
 };
 
@@ -1904,8 +1908,28 @@ export const Backend = createPointer<Partial<Ark.Backend>>(
         conf.addItemServiceId = 'powerserver___add-items';
       }
 
+      if (!conf.updateItemsServiceId) {
+        conf.updateItemsServiceId = 'powerserver___update-items';
+      }
+
+      if (!conf.removeItemsServiceId) {
+        conf.removeItemsServiceId = 'powerserver___remove-items';
+      }
+
       if (!conf.fetchContentRule) {
         conf.fetchContentRule = (options) => options.allow();
+      }
+
+      if (!conf.addItemRule) {
+        conf.addItemRule = (options) => options.allow();
+      }
+
+      if (!conf.updateItemsRule) {
+        conf.updateItemsRule = (options) => options.allow();
+      }
+
+      if (!conf.removeItemsRule) {
+        conf.removeItemsRule = (options) => options.allow();
       }
 
       if (!conf.dbName) {
@@ -1950,12 +1974,17 @@ export const Backend = createPointer<Partial<Ark.Backend>>(
               required: true,
               index: true,
             },
-            name: {
-              type: String,
-            },
             parentPath: {
               type: String,
               index: true,
+              required: true,
+            },
+            slug: {
+              type: String,
+              required: true,
+            },
+            name: {
+              type: String,
             },
             path: {
               type: String,
@@ -1969,6 +1998,7 @@ export const Backend = createPointer<Partial<Ark.Backend>>(
           })
         );
 
+        /** Fetch content */
         useService(
           defineService(conf.fetchContentServiceId, (opts) => {
             opts.defineValidator(
@@ -2013,35 +2043,132 @@ export const Backend = createPointer<Partial<Ark.Backend>>(
           })
         );
 
+        /** Add item */
         useService(
           defineService(conf.addItemServiceId, (opts) => {
             opts.defineValidator(
               Joi.object({
                 namespace: Joi.string().required(),
-                path: Joi.string(),
+                parentPath: Joi.string(),
+                name: Joi.string(),
+                meta: Joi.object(),
+                type: Joi.string(),
               })
             );
 
             opts.defineRule(conf.addItemRule);
 
             opts.defineLogic(async (opts) => {
-              const { namespace, path } = opts.args.input;
-              const res = {
-                currentDir: null,
-                items: [],
-              };
-
-              res.currentDir = await PowerWidgetNavItems.findOne({
+              const {
                 namespace,
-                path,
+                parentPath,
+                name,
+                type,
+                meta,
+              } = opts.args.input;
+
+              const slug = encodeURIComponent(
+                String(name)
+                  .replace(/\W+(?!$)/g, '-')
+                  .toLowerCase()
+                  .replace(/\W$/, '')
+              );
+              const exists = await PowerWidgetNavItems.findOne({
+                namespace,
+                parentPath,
+                slug,
               });
 
-              res.items = await PowerWidgetNavItems.find({
+              if (Boolean(exists)) {
+                return opts.error(
+                  new Error(
+                    `slug ${slug} already exists in parent path ${parentPath}`
+                  ),
+                  400
+                );
+              }
+
+              const item = new PowerWidgetNavItems({
                 namespace,
-                parentPath: path,
+                parentPath,
+                name,
+                type,
+                meta,
+                slug,
+                path: path.join(parentPath, slug),
               });
 
-              return opts.success(res);
+              await item.save();
+
+              return opts.success({}, [item]);
+            });
+          })
+        );
+
+        const deleteOnePath = async (namespace: string, path: string) => {
+          const deletedSubItemsOp = await PowerWidgetNavItems.deleteMany({
+            namespace,
+            parentPath: path,
+          });
+
+          const deletedItemsOp = await PowerWidgetNavItems.deleteMany({
+            namespace,
+            path,
+          });
+
+          return {
+            path,
+            deletedSubItemsOp,
+            deletedItemsOp,
+          };
+        };
+
+        /** Remove items */
+        useService(
+          defineService(conf.removeItemsServiceId, (opts) => {
+            opts.defineValidator(
+              Joi.object({
+                namespace: Joi.string().required(),
+                paths: Joi.array().min(1),
+              })
+            );
+
+            opts.defineRule(conf.removeItemsRule);
+
+            opts.defineLogic(async (opts) => {
+              const { namespace, paths } = opts.args.input;
+
+              let responses: any[] = [];
+              for (const path of paths) {
+                try {
+                  responses.push(await deleteOnePath(namespace, path));
+                } catch (e) {
+                  console.error(e);
+                }
+              }
+
+              console.log('responses', responses);
+              return opts.success({ ack: true, namespace }, responses);
+            });
+          })
+        );
+
+        /** Update items */
+        useService(
+          defineService(conf.updateItemsServiceId, (opts) => {
+            opts.defineValidator(
+              Joi.object({
+                namespace: Joi.string().required(),
+                path: Joi.string().required(),
+              })
+            );
+
+            opts.defineRule(conf.updateItemsRule);
+
+            opts.defineLogic(async (opts) => {
+              const { namespace, paths } = opts.args.input;
+
+              return opts.success({ ack: true, namespace }, []);
             });
           })
         );

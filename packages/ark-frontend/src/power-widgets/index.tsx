@@ -1,1 +1,4 @@
-export { Catalogue, useCatalogue } from './widgets/catalogue';
+import _controller from './core/controller';
+
+export { Catalogue, useCatalogue, useCataloguePath } from './widgets/catalogue';
+export const controller = _controller;

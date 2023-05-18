@@ -21,6 +21,8 @@ export type CustomType = {
   newItemLabel?: string;
   icon?: (...props: any[]) => JSX.Element;
   toolkit?: Partial<UIToolkit>;
+  fileSchema?: any;
+  fileCollectionName?: any;
 };
 
 export class ControllerNamespace {
@@ -43,6 +45,14 @@ export class ControllerNamespace {
 
   deleteMany(paths: string[]) {
     return this.controller.deleteMany(this.name, paths);
+  }
+
+  writeFile(filePath: string, content: any) {
+    return this.controller.writeFile(this.name, filePath, content);
+  }
+
+  readFile(filePath: string) {
+    return this.controller.readFile(this.name, filePath);
   }
 
   defineType(type: string, customType: CustomType) {
@@ -78,6 +88,7 @@ export class ControllerNamespace {
 export interface UIToolkit {
   Renderer: () => JSX.Element;
   ItemGrid: () => JSX.Element;
+  FileEditorWrapper: (props: any) => JSX.Element;
 }
 
 export class Controller {
@@ -152,6 +163,25 @@ export class Controller {
   defineType(type: string, customType: CustomType, ns: string = 'default') {
     const _ns = this.getNamespace(ns);
     _ns.defineType(type, customType);
+  }
+
+  async writeFile(ns: string, filePath: string, content: any) {
+    const res = await axios.post('/___service/main/powerserver___write-file', {
+      namespace: ns,
+      filePath,
+      content,
+    });
+
+    return res.data;
+  }
+
+  async readFile(ns: string, filePath: string): Promise<any> {
+    const res = await axios.post('/___service/main/powerserver___read-file', {
+      namespace: ns,
+      filePath,
+    });
+
+    return res.data;
   }
 }
 

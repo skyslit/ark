@@ -2105,21 +2105,41 @@ export const Backend = createPointer<Partial<Ark.Backend>>(
           })
         );
 
+        const getFullFileCollectionName = (ns: string, collName: string) => {
+          return `dyn_${ns}_${collName}`;
+        };
+
         const deleteOnePath = async (namespace: string, path: string) => {
-          const deletedSubItemsOp = await PowerWidgetNavItems.deleteMany({
+          const allItemsToDelete = await PowerWidgetNavItems.find({
             namespace,
-            parentPath: path,
+            parentPath: new RegExp(`^${path}`),
           });
 
-          const deletedItemsOp = await PowerWidgetNavItems.deleteMany({
+          const itemToDelete = (await PowerWidgetNavItems.findOne({
             namespace,
             path,
-          });
+          })) as any;
+
+          const allItems = [...allItemsToDelete, itemToDelete];
+
+          for (const item of allItems) {
+            const shouldDeleteFile = Boolean(item?.meta?.fileCollectionName);
+            if (shouldDeleteFile) {
+              const fileCollectionName = item?.meta?.fileCollectionName;
+              const collName = getFullFileCollectionName(
+                namespace,
+                fileCollectionName
+              );
+              await mongooseConnection.db.collection(collName).deleteOne({
+                _id: item._id,
+              });
+            }
+
+            await item.delete();
+          }
 
           return {
             path,
-            deletedSubItemsOp,
-            deletedItemsOp,
           };
         };
 
@@ -2169,6 +2189,98 @@ export const Backend = createPointer<Partial<Ark.Backend>>(
               const { namespace, paths } = opts.args.input;
 
               return opts.success({ ack: true, namespace }, []);
+            });
+          })
+        );
+
+        /** Read file */
+        useService(
+          defineService('powerserver___read-file', (opts) => {
+            opts.defineValidator(
+              Joi.object({
+                namespace: Joi.string().required(),
+                filePath: Joi.string().required(),
+              })
+            );
+
+            opts.defineLogic(async (opts) => {
+              const { namespace, filePath } = opts.args.input;
+
+              const item = (await PowerWidgetNavItems.findOne({
+                namespace,
+                path: filePath,
+              }).exec()) as any;
+
+              let content = null;
+
+              if (item) {
+                const fileCollectionName =
+                  item?.meta?.fileCollectionName || 'default';
+                const collName = getFullFileCollectionName(
+                  namespace,
+                  fileCollectionName
+                );
+
+                content = await mongooseConnection.db
+                  .collection(collName)
+                  .findOne({
+                    _id: item._id,
+                  });
+              }
+
+              return opts.success(
+                { ack: true, namespace, content: content || {} },
+                []
+              );
+            });
+          })
+        );
+
+        /** Write file */
+        useService(
+          defineService('powerserver___write-file', (opts) => {
+            opts.defineValidator(
+              Joi.object({
+                namespace: Joi.string().required(),
+                filePath: Joi.string().required(),
+                content: Joi.any().required(),
+              })
+            );
+
+            opts.defineLogic(async (opts) => {
+              const { namespace, filePath, content } = opts.args.input;
+
+              const item = (await PowerWidgetNavItems.findOne({
+                namespace,
+                path: filePath,
+              }).exec()) as any;
+
+              let writeOp = null;
+
+              if (item) {
+                const fileCollectionName =
+                  item?.meta?.fileCollectionName || 'default';
+                const collName = getFullFileCollectionName(
+                  namespace,
+                  fileCollectionName
+                );
+
+                delete content._id;
+
+                writeOp = await mongooseConnection.db
+                  .collection(collName)
+                  .updateOne(
+                    {
+                      _id: item._id,
+                    },
+                    {
+                      $set: content,
+                    },
+                    { upsert: true }
+                  );
+              }
+
+              return opts.success({ ack: true, namespace, writeOp }, []);
             });
           })
         );

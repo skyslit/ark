@@ -5,8 +5,11 @@ import controller, {
   ControllerNamespace,
   UIToolkit,
   Response,
+  CustomType,
 } from '../../core/controller';
 import { match } from 'path-to-regexp';
+import { ContentHook, Frontend, useArkReactServices } from '../../..';
+import { compile } from '../../utils/schema';
 
 type Modes = 'read' | 'write';
 
@@ -24,6 +27,7 @@ type CatalogueApi = {
   deleteItems: (paths: string[]) => Promise<void>;
   path: string;
   setPath: (path: string) => void;
+  controller: Controller;
   namespace: ControllerNamespace;
   mode: Modes;
   currentDir: Item;
@@ -31,6 +35,13 @@ type CatalogueApi = {
   items: Array<Item>;
   ui: UIToolkit;
   namespaceUI: UIToolkit;
+  currentCustomType: CustomType;
+};
+
+type FileApi = {
+  cms: ReturnType<ContentHook>;
+  saveChanges: () => Promise<any>;
+  loading: boolean;
 };
 
 const CatalogueContext = React.createContext<CatalogueApi>(null);
@@ -122,7 +133,16 @@ function createCatalogue(props: PropType): CatalogueApi {
 
   const createItem = React.useCallback(
     async (name: string, type: string, meta?: any) => {
-      return namespace.create(path, name, type, meta || {}).then((res) => {
+      const t = namespace.types[type];
+      let fileCollectionName = 'default';
+      if (t && t?.fileCollectionName) {
+        fileCollectionName = t.fileCollectionName;
+      }
+
+      const m = meta || {};
+      m._t = true;
+      m.fileCollectionName = fileCollectionName;
+      return namespace.create(path, name, type, m).then((res) => {
         setItems((item) => [...item, res.data[0]]);
         return res;
       });
@@ -185,6 +205,8 @@ function createCatalogue(props: PropType): CatalogueApi {
     ui,
     namespaceUI,
     deleteItems,
+    controller,
+    currentCustomType,
   };
 }
 
@@ -253,5 +275,71 @@ export function Catalogue(props: PropType) {
         {api.dirLoading === false ? <Renderer /> : null}
       </div>
     </CatalogueContext.Provider>
+  );
+}
+
+export function createFileEditor(): FileApi {
+  const api = useCatalogue();
+  const { use } = useArkReactServices();
+  const { useContent } = use(Frontend);
+  const [loading, setLoading] = React.useState(false);
+
+  const defaultContent = React.useMemo(() => {
+    if (api?.currentCustomType?.fileSchema) {
+      return compile(api.currentCustomType.fileSchema);
+    }
+
+    return {};
+  }, [api?.currentCustomType?.fileSchema]);
+
+  const cms: ReturnType<ContentHook> = useContent({
+    serviceId: api.path,
+    defaultContent,
+  }) as any;
+
+  const saveChanges = React.useCallback(async () => {
+    return api.namespace.writeFile(api.path, cms.content).then(() => {
+      cms.markAsSaved();
+    });
+  }, [cms.content, api.namespace, api.path]);
+
+  React.useEffect(() => {
+    setLoading(true);
+    api.namespace.readFile(api.path).then((res) => {
+      cms.setContent(
+        compile(api.currentCustomType.fileSchema, res?.meta?.content)
+      );
+      setLoading(false);
+    });
+  }, [api.namespace, api.path, api?.currentCustomType?.fileSchema]);
+
+  return {
+    cms,
+    saveChanges,
+    loading,
+  };
+}
+
+const FileEditorContext = React.createContext<FileApi>(null);
+
+export function useFile() {
+  return React.useContext(FileEditorContext);
+}
+
+export function FileEditor(props: any) {
+  const api = useCatalogue();
+  const fileEditor = createFileEditor();
+  const FileEditorWrapper = React.useMemo(() => {
+    if (api?.ui?.FileEditorWrapper) {
+      return api?.ui?.FileEditorWrapper;
+    }
+
+    return () => props.children;
+  }, [api?.ui?.FileEditorWrapper, props.children]);
+
+  return (
+    <FileEditorContext.Provider value={fileEditor}>
+      <FileEditorWrapper {...props} />
+    </FileEditorContext.Provider>
   );
 }

@@ -2167,28 +2167,87 @@ export const Backend = createPointer<Partial<Ark.Backend>>(
                 }
               }
 
-              console.log('responses', responses);
               return opts.success({ ack: true, namespace }, responses);
             });
           })
         );
 
-        /** Update items */
+        /** Rename item */
         useService(
-          defineService(conf.updateItemsServiceId, (opts) => {
+          defineService('powerserver___rename-item', (opts) => {
             opts.defineValidator(
               Joi.object({
                 namespace: Joi.string().required(),
                 path: Joi.string().required(),
+                newName: Joi.string().required(),
               })
             );
 
-            opts.defineRule(conf.updateItemsRule);
-
             opts.defineLogic(async (opts) => {
-              const { namespace, paths } = opts.args.input;
+              const { namespace, path: _path, newName } = opts.args.input;
 
-              return opts.success({ ack: true, namespace }, []);
+              const exists = (await PowerWidgetNavItems.findOne({
+                namespace,
+                path: _path,
+              })) as any;
+
+              if (!exists) {
+                return opts.error(new Error('Item not found by path'), 404);
+              }
+
+              const needRename = newName !== exists.name;
+
+              const newSlug = needRename
+                ? encodeURIComponent(
+                    String(newName)
+                      .replace(/\W+(?!$)/g, '-')
+                      .toLowerCase()
+                      .replace(/\W$/, '')
+                  )
+                : exists.slug;
+
+              const newPath = needRename
+                ? path.join(exists.parentPath, newSlug)
+                : exists.path;
+
+              if (needRename) {
+                const newPathExists = (await PowerWidgetNavItems.findOne({
+                  namespace,
+                  path: newPath,
+                })) as any;
+
+                if (newPathExists) {
+                  return opts.error(
+                    new Error(
+                      'Item with same name already exists in the folder'
+                    ),
+                    404
+                  );
+                }
+
+                /** Update path and slug */
+                exists.path = newPath;
+                exists.slug = newSlug;
+                exists.name = newName;
+                await exists.save();
+
+                /** Update all child items */
+                const allChildItems = (await PowerWidgetNavItems.find({
+                  namespace,
+                  parentPath: new RegExp(`^${_path}`),
+                })) as any[];
+
+                for (const item of allChildItems) {
+                  item.path = String(item.path).replace(_path, newPath);
+                  item.parentPath = String(item.parentPath).replace(
+                    _path,
+                    newPath
+                  );
+                  await item.save();
+                }
+              }
+
+              return opts.success({ ack: true, newPath, newSlug }, []);
             });
           })
         );

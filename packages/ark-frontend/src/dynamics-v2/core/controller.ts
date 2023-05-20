@@ -43,6 +43,10 @@ export class ControllerNamespace {
     return this.controller.create(this.name, parentPath, name, type, meta);
   }
 
+  rename(path: string, newName: string) {
+    return this.controller.rename(this.name, path, newName);
+  }
+
   deleteMany(paths: string[]) {
     return this.controller.deleteMany(this.name, paths);
   }
@@ -130,6 +134,16 @@ export class Controller {
       name,
       type,
       meta,
+    });
+
+    return res.data;
+  }
+
+  async rename(ns: string, path: string, newName: string) {
+    const res = await axios.post('/___service/main/powerserver___rename-item', {
+      namespace: ns,
+      path,
+      newName,
     });
 
     return res.data;

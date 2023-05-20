@@ -10,10 +10,12 @@ import controller, {
 import { match } from 'path-to-regexp';
 import { ContentHook, Frontend, useArkReactServices } from '../../..';
 import { compile } from '../../utils/schema';
+import { joinPath } from '../../utils/path';
 
 type Modes = 'read' | 'write';
 
 type PropType = {
+  basePath?: string;
   controller?: Controller;
   namespace?: string;
   initialPath?: string;
@@ -25,6 +27,8 @@ type PropType = {
 type CatalogueApi = {
   createItem: (name: string, type: string, payload?: any) => Promise<any>;
   deleteItems: (paths: string[]) => Promise<void>;
+  renameItem: (path: string, newName: string) => Promise<any>;
+  basePath: string;
   path: string;
   setPath: (path: string) => void;
   controller: Controller;
@@ -36,6 +40,7 @@ type CatalogueApi = {
   ui: UIToolkit;
   namespaceUI: UIToolkit;
   currentCustomType: CustomType;
+  getFullUrlFromPath: (val: string) => string;
 };
 
 type FileApi = {
@@ -48,6 +53,11 @@ const CatalogueContext = React.createContext<CatalogueApi>(null);
 
 function createCatalogue(props: PropType): CatalogueApi {
   const { initialPath } = props;
+
+  const basePath = React.useMemo(() => {
+    return props?.basePath || '/';
+  }, [props.basePath]);
+
   const prevPathRef = React.useRef<string>(initialPath || '/');
   const [controlledPath, setControlledPath] = React.useState<string>(
     prevPathRef.current
@@ -165,6 +175,38 @@ function createCatalogue(props: PropType): CatalogueApi {
     [namespace]
   );
 
+  const renameItem = React.useCallback(
+    async (path: string, newName: string) => {
+      return namespace.rename(path, newName).then((r) => {
+        setItems((items) =>
+          items.map((item) => {
+            if (item.path === path) {
+              return {
+                ...item,
+                name: newName,
+                path: r.meta.newPath,
+                slug: r.meta.newSlug,
+              };
+            }
+            return item;
+          })
+        );
+        return r;
+      });
+    },
+    [namespace, path]
+  );
+
+  const getFullUrlFromPath = React.useCallback(
+    (_path) => {
+      if (basePath) {
+        return joinPath(basePath, _path);
+      }
+      return _path;
+    },
+    [basePath]
+  );
+
   React.useEffect(() => {
     prevPathRef.current = path;
     setDirLoading(true);
@@ -207,6 +249,9 @@ function createCatalogue(props: PropType): CatalogueApi {
     deleteItems,
     controller,
     currentCustomType,
+    getFullUrlFromPath,
+    basePath,
+    renameItem,
   };
 }
 

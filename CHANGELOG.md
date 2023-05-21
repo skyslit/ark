@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.33.0](https://github.com/skyslit/ark/compare/v2.32.3...v2.33.0) (2023-05-21)
+
+
+### Features
+
+* added dynamics v2 apis ([0e9db3d](https://github.com/skyslit/ark/commit/0e9db3ddc6f2e19843fbf058cdd560d338fb727b))
+
+
+
+
+
 ## [2.32.3](https://github.com/skyslit/ark/compare/v2.32.2...v2.32.3) (2023-05-05)
 
 

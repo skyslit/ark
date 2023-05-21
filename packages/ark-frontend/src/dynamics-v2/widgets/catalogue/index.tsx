@@ -28,6 +28,7 @@ type CatalogueApi = {
   createItem: (name: string, type: string, payload?: any) => Promise<any>;
   deleteItems: (paths: string[]) => Promise<void>;
   renameItem: (path: string, newName: string) => Promise<any>;
+  updateItem: (path: string, meta: any, security: any) => Promise<any>;
   basePath: string;
   path: string;
   setPath: (path: string) => void;
@@ -44,6 +45,12 @@ type CatalogueApi = {
 };
 
 type FileApi = {
+  cms: ReturnType<ContentHook>;
+  saveChanges: () => Promise<any>;
+  loading: boolean;
+};
+
+type PropertiesApi = {
   cms: ReturnType<ContentHook>;
   saveChanges: () => Promise<any>;
   loading: boolean;
@@ -194,7 +201,28 @@ function createCatalogue(props: PropType): CatalogueApi {
         return r;
       });
     },
-    [namespace, path]
+    [namespace]
+  );
+
+  const updateItem = React.useCallback(
+    (path: string, meta: any, security: any) => {
+      return namespace.update(path, meta, security).then((r) => {
+        setItems((items) =>
+          items.map((item) => {
+            if (item.path === path) {
+              return {
+                ...item,
+                meta: meta,
+                security: security,
+              };
+            }
+            return item;
+          })
+        );
+        return r;
+      });
+    },
+    [namespace]
   );
 
   const getFullUrlFromPath = React.useCallback(
@@ -252,6 +280,7 @@ function createCatalogue(props: PropType): CatalogueApi {
     getFullUrlFromPath,
     basePath,
     renameItem,
+    updateItem,
   };
 }
 
@@ -386,5 +415,72 @@ export function FileEditor(props: any) {
     <FileEditorContext.Provider value={fileEditor}>
       <FileEditorWrapper {...props} />
     </FileEditorContext.Provider>
+  );
+}
+
+/* -------------------------------------------------------------------------- */
+/*                                 Properties                                 */
+/* -------------------------------------------------------------------------- */
+
+const PropertiesEditorContext = React.createContext<PropertiesApi>(null);
+
+export function createPropertiesProvider(): PropertiesApi {
+  const api = useCatalogue();
+  const { use } = useArkReactServices();
+  const { useContent } = use(Frontend);
+  const [loading, setLoading] = React.useState(false);
+
+  const defaultContent = React.useMemo(() => {
+    if (api?.currentCustomType?.fileSchema) {
+      return compile(api.currentCustomType.fileSchema);
+    }
+
+    return {
+      meta: {},
+      security: {},
+    };
+  }, [api?.currentCustomType?.fileSchema]);
+
+  const cms: ReturnType<ContentHook> = useContent({
+    serviceId: api.path,
+    defaultContent,
+  }) as any;
+
+  const saveChanges = React.useCallback(async () => {
+    setLoading(true);
+    return api.namespace.writeFile(api.path, cms.content).then(() => {
+      cms.markAsSaved();
+      setLoading(false);
+    });
+  }, [cms.content, api.namespace, api.path]);
+
+  React.useEffect(() => {
+    setLoading(true);
+    api.namespace.readFile(api.path).then((res) => {
+      cms.setContent(
+        compile(api.currentCustomType.fileSchema, res?.meta?.content)
+      );
+      setLoading(false);
+    });
+  }, [api.namespace, api.path, api?.currentCustomType?.fileSchema]);
+
+  return {
+    cms,
+    saveChanges,
+    loading,
+  };
+}
+
+export function useProperties() {
+  return React.useContext(PropertiesEditorContext);
+}
+
+export function PropetriesProvider(props: any) {
+  const propertiesApi = createPropertiesProvider();
+
+  return (
+    <PropertiesEditorContext.Provider value={propertiesApi}>
+      {props.children}
+    </PropertiesEditorContext.Provider>
   );
 }

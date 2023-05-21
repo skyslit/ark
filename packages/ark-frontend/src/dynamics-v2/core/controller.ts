@@ -20,6 +20,7 @@ export type CustomType = {
   name: string;
   newItemLabel?: string;
   icon?: (...props: any[]) => JSX.Element;
+  metaEditor?: (...props: any[]) => JSX.Element;
   toolkit?: Partial<UIToolkit>;
   fileSchema?: any;
   fileCollectionName?: any;
@@ -41,6 +42,10 @@ export class ControllerNamespace {
 
   create(parentPath: string, name: string, type: string, meta: any) {
     return this.controller.create(this.name, parentPath, name, type, meta);
+  }
+
+  update(path: string, meta: any, security: any) {
+    return this.controller.update(this.name, path, meta, security);
   }
 
   rename(path: string, newName: string) {
@@ -134,6 +139,17 @@ export class Controller {
       name,
       type,
       meta,
+    });
+
+    return res.data;
+  }
+
+  async update(ns: string, path: string, meta: any, security: any) {
+    const res = await axios.post('/___service/main/powerserver___update-item', {
+      namespace: ns,
+      path,
+      meta,
+      security,
     });
 
     return res.data;

@@ -6,6 +6,8 @@ export {
   useCataloguePath,
   useFile,
   FileEditor,
+  useProperties,
+  PropetriesProvider,
 } from './widgets/catalogue';
 export { compile, createSchema } from './utils/schema';
 

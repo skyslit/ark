@@ -56,6 +56,7 @@ import {
   RedisScripts,
 } from 'redis';
 import { createAdapter } from '@socket.io/redis-adapter';
+import { createDynamicsV2Services } from './dynamics-services';
 
 type HttpVerbs =
   | 'all'
@@ -172,6 +173,18 @@ type DynamicsServerConfig = {
   dbName?: string;
 };
 
+export type DynamicsServerV2Config = {
+  fetchContentServiceId?: string;
+  addItemServiceId?: string;
+  removeItemsServiceId?: string;
+  updateItemsServiceId?: string;
+  fetchContentRule?: RuleDefinition;
+  addItemRule?: RuleDefinition;
+  removeItemsRule?: RuleDefinition;
+  updateItemsRule?: RuleDefinition;
+  dbName?: string;
+};
+
 declare global {
   // eslint-disable-next-line no-unused-vars
   namespace Express {
@@ -215,6 +228,7 @@ declare global {
         htmlFileName?: string
       ) => WebAppRenderer;
       enableDynamicsServer: (conf?: DynamicsServerConfig) => void;
+      enableDynamicsV2Services: (conf?: DynamicsServerV2Config) => void;
       useRemoteConfig: (
         initialState?: Partial<RemoteConfig>,
         dbName?: string
@@ -545,6 +559,7 @@ function createWebAppRenderer(
             initialState || {},
             serviceState || {}
           ),
+          // @ts-ignore
           helmetContext,
         })
           .then((App) => {
@@ -557,7 +572,7 @@ function createWebAppRenderer(
             let headContent: string[] = [];
 
             try {
-              headContent = Object.keys(helmetContext.helmet).reduce(
+              headContent = Object.keys(helmetContext?.helmet || {}).reduce(
                 (acc, item) => {
                   let c: string = null;
                   try {
@@ -1880,6 +1895,9 @@ export const Backend = createPointer<Partial<Ark.Backend>>(
           })
         );
       }
+    },
+    enableDynamicsV2Services: (conf?) => {
+      return createDynamicsV2Services(context, moduleId, conf);
     },
     useRemoteConfig: (initialState, dbName) => {
       dbName = dbName ? dbName : 'default';

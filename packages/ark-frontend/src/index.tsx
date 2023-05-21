@@ -103,7 +103,7 @@ type ContentHookOptions<T> = {
   useReduxStore: boolean;
   enableLocalStorage?: boolean;
 };
-type ContentHook = <T>(
+export type ContentHook = <T>(
   serviceId: string | Partial<ContentHookOptions<T>>
 ) => {
   isAvailable: boolean;

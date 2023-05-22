@@ -7,6 +7,7 @@ export type Item = {
   type: string;
   resolved: boolean;
   meta: any;
+  security: any;
   slug: string;
 };
 
@@ -23,6 +24,7 @@ export type CustomType = {
   metaEditor?: (...props: any[]) => JSX.Element;
   toolkit?: Partial<UIToolkit>;
   fileSchema?: any;
+  propertiesSchema?: any;
   fileCollectionName?: any;
 };
 

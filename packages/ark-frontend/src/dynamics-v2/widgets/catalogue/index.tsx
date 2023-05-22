@@ -9,7 +9,7 @@ import controller, {
 } from '../../core/controller';
 import { match } from 'path-to-regexp';
 import { ContentHook, Frontend, useArkReactServices } from '../../..';
-import { compile } from '../../utils/schema';
+import { compile, createSchema } from '../../utils/schema';
 import { joinPath } from '../../utils/path';
 
 type Modes = 'read' | 'write';
@@ -424,45 +424,59 @@ export function FileEditor(props: any) {
 
 const PropertiesEditorContext = React.createContext<PropertiesApi>(null);
 
-export function createPropertiesProvider(): PropertiesApi {
+const securitySchema = createSchema({
+  permissions: [
+    createSchema({
+      type: '', // userId | groupId | public
+      groupId: '',
+      userId: '',
+      access: 'none', // none | read | write | owner
+    }),
+  ],
+});
+
+export function createPropertiesProvider(item: Item): PropertiesApi {
   const api = useCatalogue();
   const { use } = useArkReactServices();
   const { useContent } = use(Frontend);
   const [loading, setLoading] = React.useState(false);
 
   const defaultContent = React.useMemo(() => {
-    if (api?.currentCustomType?.fileSchema) {
-      return compile(api.currentCustomType.fileSchema);
+    const type = api.namespace.types[item.type];
+    let meta: any = {};
+    if (type?.propertiesSchema) {
+      meta = compile(type.propertiesSchema, item.meta || {});
     }
 
     return {
-      meta: {},
-      security: {},
+      meta,
+      security: compile(securitySchema, item?.security || {}),
     };
-  }, [api?.currentCustomType?.fileSchema]);
+  }, [item, api.namespace]);
 
-  const cms: ReturnType<ContentHook> = useContent({
+  const cms: ReturnType<ContentHook> = useContent<any>({
     serviceId: api.path,
     defaultContent,
   }) as any;
 
   const saveChanges = React.useCallback(async () => {
     setLoading(true);
-    return api.namespace.writeFile(api.path, cms.content).then(() => {
-      cms.markAsSaved();
-      setLoading(false);
-    });
-  }, [cms.content, api.namespace, api.path]);
+    return api
+      .updateItem(
+        item.path,
+        (cms.content as any).meta,
+        (cms.content as any).security
+      )
+      .then((res) => {
+        cms.markAsSaved();
+        setLoading(false);
+        return res;
+      });
+  }, [cms.content, api.namespace, item.path]);
 
   React.useEffect(() => {
-    setLoading(true);
-    api.namespace.readFile(api.path).then((res) => {
-      cms.setContent(
-        compile(api.currentCustomType.fileSchema, res?.meta?.content)
-      );
-      setLoading(false);
-    });
-  }, [api.namespace, api.path, api?.currentCustomType?.fileSchema]);
+    cms.setContent(defaultContent);
+  }, [defaultContent]);
 
   return {
     cms,
@@ -475,8 +489,8 @@ export function useProperties() {
   return React.useContext(PropertiesEditorContext);
 }
 
-export function PropetriesProvider(props: any) {
-  const propertiesApi = createPropertiesProvider();
+export function PropetriesProvider(props: { item: Item; children?: any }) {
+  const propertiesApi = createPropertiesProvider(props.item);
 
   return (
     <PropertiesEditorContext.Provider value={propertiesApi}>

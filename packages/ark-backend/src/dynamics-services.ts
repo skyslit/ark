@@ -227,6 +227,19 @@ export function createDynamicsV2Services(
         opts.defineLogic(async (opts) => {
           const { namespace, path, meta, security } = opts.args.input;
 
+          await PowerWidgetNavItems.updateOne(
+            {
+              namespace,
+              path,
+            },
+            {
+              $set: {
+                meta,
+                security,
+              },
+            }
+          );
+
           return opts.success({ ack: true }, []);
         });
       })

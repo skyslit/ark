@@ -24,6 +24,11 @@ type PropType = {
   mode?: Modes;
 };
 
+type Claim = {
+  read: boolean;
+  write: boolean;
+  owner: boolean;
+};
 type CatalogueApi = {
   createItem: (name: string, type: string, payload?: any) => Promise<any>;
   deleteItems: (paths: string[]) => Promise<void>;
@@ -42,6 +47,7 @@ type CatalogueApi = {
   namespaceUI: UIToolkit;
   currentCustomType: CustomType;
   getFullUrlFromPath: (val: string) => string;
+  claims: Claim;
 };
 
 type FileApi = {
@@ -71,6 +77,11 @@ function createCatalogue(props: PropType): CatalogueApi {
   );
   const [dirLoading, setDirLoading] = React.useState(true);
   const [items, setItems] = React.useState<Array<Item>>([]);
+  const [claims, setClaims] = React.useState<Claim>({
+    owner: false,
+    read: false,
+    write: false,
+  });
 
   const mode = React.useMemo<Modes>(() => {
     if (props.mode === undefined) {
@@ -238,6 +249,11 @@ function createCatalogue(props: PropType): CatalogueApi {
   React.useEffect(() => {
     prevPathRef.current = path;
     setDirLoading(true);
+    setClaims({
+      owner: false,
+      read: false,
+      write: false,
+    });
     setCurrentDir(null);
     setItems([]);
 
@@ -249,9 +265,13 @@ function createCatalogue(props: PropType): CatalogueApi {
             setDirLoading(false);
             setCurrentDir(res.currentDir);
             setItems(res.items);
+            setClaims(res.claims);
           }
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          setDirLoading(false);
+          console.error(err);
+        });
     }
     namespace;
   }, [path, namespace]);
@@ -281,6 +301,7 @@ function createCatalogue(props: PropType): CatalogueApi {
     basePath,
     renameItem,
     updateItem,
+    claims,
   };
 }
 
@@ -428,8 +449,8 @@ const securitySchema = createSchema({
   permissions: [
     createSchema({
       type: '', // userId | groupId | public
-      groupId: '',
-      userId: '',
+      policy: '',
+      userEmail: '',
       access: 'none', // none | read | write | owner
     }),
   ],

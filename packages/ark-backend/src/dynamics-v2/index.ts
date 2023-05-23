@@ -3,10 +3,14 @@ import {
   DynamicsServerV2Config,
   defineService,
   useServiceCreator,
-} from './index';
+} from '../index';
 import { Document, Schema, Connection } from 'mongoose';
 import Joi from 'joi';
 import path from 'path';
+import {
+  IDynamicsPermissionDataStore,
+  getItemPermission,
+} from './utils/get-item-permission';
 
 export function createDynamicsV2Services(
   context: ApplicationContext,
@@ -15,38 +19,6 @@ export function createDynamicsV2Services(
 ) {
   if (!conf) {
     conf = {};
-  }
-
-  if (!conf.fetchContentServiceId) {
-    conf.fetchContentServiceId = 'powerserver___fetch-content';
-  }
-
-  if (!conf.addItemServiceId) {
-    conf.addItemServiceId = 'powerserver___add-items';
-  }
-
-  if (!conf.updateItemsServiceId) {
-    conf.updateItemsServiceId = 'powerserver___update-items';
-  }
-
-  if (!conf.removeItemsServiceId) {
-    conf.removeItemsServiceId = 'powerserver___remove-items';
-  }
-
-  if (!conf.fetchContentRule) {
-    conf.fetchContentRule = (options) => options.allow();
-  }
-
-  if (!conf.addItemRule) {
-    conf.addItemRule = (options) => options.allow();
-  }
-
-  if (!conf.updateItemsRule) {
-    conf.updateItemsRule = (options) => options.allow();
-  }
-
-  if (!conf.removeItemsRule) {
-    conf.removeItemsRule = (options) => options.allow();
   }
 
   if (!conf.dbName) {
@@ -111,9 +83,27 @@ export function createDynamicsV2Services(
       })
     );
 
+    const permissionDataServer: IDynamicsPermissionDataStore = {
+      async getItems(paths) {
+        const items = (await PowerWidgetNavItems.find({
+          path: {
+            $in: paths,
+          },
+        })) as any[];
+
+        return paths.reduce((acc, path) => {
+          const item = items.find((item) => item.path === path);
+          if (item) {
+            acc.push(item);
+          }
+          return acc;
+        }, []);
+      },
+    };
+
     /** Fetch content */
     useService(
-      defineService(conf.fetchContentServiceId, (opts) => {
+      defineService('powerserver___fetch-content', (opts) => {
         opts.defineValidator(
           Joi.object({
             namespace: Joi.string().required(),
@@ -121,13 +111,23 @@ export function createDynamicsV2Services(
           })
         );
 
-        opts.defineRule(conf.fetchContentRule);
-
         opts.defineLogic(async (opts) => {
           const { namespace, path } = opts.args.input;
+
+          const permissionResult = await getItemPermission(
+            namespace,
+            path,
+            opts.args.user,
+            permissionDataServer
+          );
+          if (permissionResult?.claims?.read !== true) {
+            return opts.error(new Error('Unauthorized'), 401);
+          }
+
           const res = {
             currentDir: null,
             items: [],
+            claims: permissionResult.claims,
           };
 
           if (path === '/') {
@@ -158,7 +158,7 @@ export function createDynamicsV2Services(
 
     /** Add item */
     useService(
-      defineService(conf.addItemServiceId, (opts) => {
+      defineService('powerserver___add-items', (opts) => {
         opts.defineValidator(
           Joi.object({
             namespace: Joi.string().required(),
@@ -168,8 +168,6 @@ export function createDynamicsV2Services(
             type: Joi.string(),
           })
         );
-
-        opts.defineRule(conf.addItemRule);
 
         opts.defineLogic(async (opts) => {
           const { namespace, parentPath, name, type, meta } = opts.args.input;
@@ -285,15 +283,13 @@ export function createDynamicsV2Services(
 
     /** Remove items */
     useService(
-      defineService(conf.removeItemsServiceId, (opts) => {
+      defineService('powerserver___remove-items', (opts) => {
         opts.defineValidator(
           Joi.object({
             namespace: Joi.string().required(),
             paths: Joi.array().min(1),
           })
         );
-
-        opts.defineRule(conf.removeItemsRule);
 
         opts.defineLogic(async (opts) => {
           const { namespace, paths } = opts.args.input;

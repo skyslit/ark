@@ -14,6 +14,7 @@ export type Item = {
 export type Response = {
   currentDir: Item;
   items: Item[];
+  claims: any;
 };
 
 export type CustomType = {

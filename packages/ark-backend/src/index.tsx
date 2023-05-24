@@ -56,7 +56,7 @@ import {
   RedisScripts,
 } from 'redis';
 import { createAdapter } from '@socket.io/redis-adapter';
-import { createDynamicsV2Services } from './dynamics-services';
+import { createDynamicsV2Services } from './dynamics-v2';
 
 type HttpVerbs =
   | 'all'
@@ -174,14 +174,6 @@ type DynamicsServerConfig = {
 };
 
 export type DynamicsServerV2Config = {
-  fetchContentServiceId?: string;
-  addItemServiceId?: string;
-  removeItemsServiceId?: string;
-  updateItemsServiceId?: string;
-  fetchContentRule?: RuleDefinition;
-  addItemRule?: RuleDefinition;
-  removeItemsRule?: RuleDefinition;
-  updateItemsRule?: RuleDefinition;
   dbName?: string;
 };
 

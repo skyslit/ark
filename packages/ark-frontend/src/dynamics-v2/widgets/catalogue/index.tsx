@@ -24,11 +24,36 @@ type PropType = {
   mode?: Modes;
 };
 
+type Claim = {
+  read: boolean;
+  write: boolean;
+  owner: boolean;
+};
+
+type ClipboardObject = {
+  action: string;
+  meta?: any;
+};
+
 type CatalogueApi = {
   createItem: (name: string, type: string, payload?: any) => Promise<any>;
   deleteItems: (paths: string[]) => Promise<void>;
-  renameItem: (path: string, newName: string) => Promise<any>;
+  renameItem: (
+    path: string,
+    newParentPath: string,
+    newName: string
+  ) => Promise<any>;
   updateItem: (path: string, meta: any, security: any) => Promise<any>;
+  moveItem: (
+    sourcePath: string,
+    destParentPath: string,
+    newName: string
+  ) => Promise<any>;
+  createShortcut: (
+    sourceItem: string,
+    destinationDirPath: string,
+    fileName: string
+  ) => Promise<any>;
   basePath: string;
   path: string;
   setPath: (path: string) => void;
@@ -41,7 +66,12 @@ type CatalogueApi = {
   ui: UIToolkit;
   namespaceUI: UIToolkit;
   currentCustomType: CustomType;
+  getDestinationPathFromItem: (item: Item) => string;
   getFullUrlFromPath: (val: string) => string;
+  claims: Claim;
+  clipboard: ClipboardObject;
+  setClipboard: (obj: ClipboardObject) => void;
+  findNextUniqueName: (name: string) => string;
 };
 
 type FileApi = {
@@ -65,12 +95,18 @@ function createCatalogue(props: PropType): CatalogueApi {
     return props?.basePath || '/';
   }, [props.basePath]);
 
+  const [clipboard, setClipboard] = React.useState<ClipboardObject>(null);
   const prevPathRef = React.useRef<string>(initialPath || '/');
   const [controlledPath, setControlledPath] = React.useState<string>(
     prevPathRef.current
   );
   const [dirLoading, setDirLoading] = React.useState(true);
   const [items, setItems] = React.useState<Array<Item>>([]);
+  const [claims, setClaims] = React.useState<Claim>({
+    owner: false,
+    read: false,
+    write: false,
+  });
 
   const mode = React.useMemo<Modes>(() => {
     if (props.mode === undefined) {
@@ -171,10 +207,21 @@ function createCatalogue(props: PropType): CatalogueApi {
     async (paths: string[]) => {
       return namespace.deleteMany(paths).then((res) => {
         setItems((items) =>
-          items.filter((item) => {
-            const shouldRemove = paths.indexOf(item.path);
-            return shouldRemove;
-          })
+          items
+            .filter((item) => {
+              const shouldRemove = paths.indexOf(item.path);
+              return shouldRemove;
+            })
+            .filter((item) => {
+              if (item?.isSymLink === true) {
+                const shouldRemove = paths.some((removedPath) => {
+                  return removedPath.startsWith(item.destinationPath);
+                });
+                return shouldRemove;
+              }
+
+              return true;
+            })
         );
         return res;
       });
@@ -183,8 +230,8 @@ function createCatalogue(props: PropType): CatalogueApi {
   );
 
   const renameItem = React.useCallback(
-    async (path: string, newName: string) => {
-      return namespace.rename(path, newName).then((r) => {
+    async (path: string, newParentPath: string, newName: string) => {
+      return namespace.rename(path, newParentPath, newName).then((r) => {
         setItems((items) =>
           items.map((item) => {
             if (item.path === path) {
@@ -235,9 +282,22 @@ function createCatalogue(props: PropType): CatalogueApi {
     [basePath]
   );
 
+  const getDestinationPathFromItem = React.useCallback((item: Item) => {
+    if (item?.isSymLink === true) {
+      return item?.destinationPath;
+    }
+
+    return item?.path;
+  }, []);
+
   React.useEffect(() => {
     prevPathRef.current = path;
     setDirLoading(true);
+    setClaims({
+      owner: false,
+      read: false,
+      write: false,
+    });
     setCurrentDir(null);
     setItems([]);
 
@@ -249,9 +309,13 @@ function createCatalogue(props: PropType): CatalogueApi {
             setDirLoading(false);
             setCurrentDir(res.currentDir);
             setItems(res.items);
+            setClaims(res.claims);
           }
         })
-        .catch((err) => console.error(err));
+        .catch((err) => {
+          setDirLoading(false);
+          console.error(err);
+        });
     }
     namespace;
   }, [path, namespace]);
@@ -263,7 +327,51 @@ function createCatalogue(props: PropType): CatalogueApi {
     return dirLoading;
   }, [dirLoading, path]);
 
+  const moveItem = React.useCallback(
+    async (sourceItem, destParentPath, newName) => {
+      return namespace.rename(sourceItem, destParentPath, newName).then((r) => {
+        setItems((items) => [...items, r.meta.updatedItem]);
+        return r;
+      });
+    },
+    []
+  );
+
+  const createShortcut = React.useCallback(
+    async (sourcePath, destinationDirPath, fileName) => {
+      return namespace
+        .createShortcut(sourcePath, destinationDirPath, fileName)
+        .then((res) => {
+          setItems((item) => [...item, res.data[0]]);
+        });
+    },
+    [namespace]
+  );
+
+  const findNextUniqueName = React.useCallback(
+    (name: string) => {
+      let uniqueName = name;
+
+      let isScanning = true;
+      let attempt = 0;
+      while (isScanning === true) {
+        const existingItem = items.find((item) => item.name === uniqueName);
+        if (!existingItem) {
+          isScanning = false;
+          break;
+        }
+
+        attempt++;
+        uniqueName = `${name} (${attempt})`;
+      }
+
+      return uniqueName;
+    },
+    [items]
+  );
+
   return {
+    findNextUniqueName,
     path,
     setPath,
     namespace,
@@ -281,6 +389,12 @@ function createCatalogue(props: PropType): CatalogueApi {
     basePath,
     renameItem,
     updateItem,
+    claims,
+    clipboard,
+    setClipboard,
+    moveItem,
+    createShortcut,
+    getDestinationPathFromItem,
   };
 }
 
@@ -428,8 +542,8 @@ const securitySchema = createSchema({
   permissions: [
     createSchema({
       type: '', // userId | groupId | public
-      groupId: '',
-      userId: '',
+      policy: '',
+      userEmail: '',
       access: 'none', // none | read | write | owner
     }),
   ],

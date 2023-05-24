@@ -59,6 +59,16 @@ export function createDynamicsV2Services(
           required: true,
           index: true,
         },
+        isSymLink: {
+          type: Boolean,
+          required: false,
+          default: false,
+        },
+        destinationPath: {
+          type: String,
+          required: false,
+          default: null,
+        },
         parentPath: {
           type: String,
           index: true,
@@ -80,6 +90,12 @@ export function createDynamicsV2Services(
         meta: {
           type: Object,
         },
+        security: {
+          type: Object,
+          default: {
+            permissions: [],
+          },
+        },
       })
     );
 
@@ -99,6 +115,196 @@ export function createDynamicsV2Services(
           return acc;
         }, []);
       },
+    };
+
+    const getFullFileCollectionName = (ns: string, collName: string) => {
+      return `dyn_${ns}_${collName}`;
+    };
+
+    const renameItem = async (
+      namespace: string,
+      _path: string,
+      newParentPath: string,
+      newName: string
+    ) => {
+      newParentPath = newParentPath || '/';
+
+      const exists = (await PowerWidgetNavItems.findOne({
+        namespace,
+        path: _path,
+      })) as any;
+
+      if (!exists) {
+        throw new Error('Item not found by path');
+      }
+
+      const needRename =
+        newName !== exists.name || newParentPath !== exists.parentPath;
+
+      const newSlug = needRename
+        ? encodeURIComponent(
+            String(newName)
+              .replace(/\W+(?!$)/g, '-')
+              .toLowerCase()
+              .replace(/\W$/, '')
+          )
+        : exists.slug;
+
+      const newPath = needRename
+        ? path.posix.join(newParentPath, newSlug)
+        : exists.path;
+
+      if (needRename) {
+        const newPathExists = (await PowerWidgetNavItems.findOne({
+          namespace,
+          path: newPath,
+        })) as any;
+
+        if (newPathExists) {
+          throw new Error('Item with same name already exists in the folder');
+        }
+
+        /** Update path and slug */
+        exists.parentPath = newParentPath;
+        exists.path = newPath;
+        exists.slug = newSlug;
+        exists.name = newName;
+        await exists.save();
+
+        /** Update all child items */
+        const allChildItems = (await PowerWidgetNavItems.find({
+          namespace,
+          parentPath: new RegExp(`^${_path}`),
+        })) as any[];
+
+        for (const item of allChildItems) {
+          item.path = String(item.path).replace(_path, newPath);
+          item.parentPath = String(item.parentPath).replace(_path, newPath);
+          await item.save();
+        }
+      }
+
+      return {
+        newPath,
+        newSlug,
+        updatedItem: exists,
+      };
+    };
+
+    const deleteOnePath = async (namespace: string, path: string) => {
+      const allItemsToDelete = await PowerWidgetNavItems.find({
+        namespace,
+        parentPath: new RegExp(`^${path}`),
+      });
+
+      const itemToDelete = (await PowerWidgetNavItems.findOne({
+        namespace,
+        path,
+      })) as any;
+
+      const shortcuts = await PowerWidgetNavItems.find({
+        namespace,
+        destinationPath: new RegExp(`^${path}`),
+        isSymLink: true,
+      });
+
+      const allItems = [...allItemsToDelete, ...shortcuts, itemToDelete];
+
+      for (const item of allItems) {
+        let shouldDeleteFile = Boolean(item?.meta?.fileCollectionName);
+
+        if (item?.isSymLink === true) {
+          shouldDeleteFile = false;
+        }
+
+        if (shouldDeleteFile) {
+          const fileCollectionName = item?.meta?.fileCollectionName;
+          const collName = getFullFileCollectionName(
+            namespace,
+            fileCollectionName
+          );
+          await mongooseConnection.db.collection(collName).deleteOne({
+            _id: item._id,
+          });
+        }
+
+        await item.delete();
+      }
+
+      return {
+        path,
+      };
+    };
+
+    const addItem = async (
+      namespace: string,
+      parentPath: string,
+      name: string,
+      type: string,
+      meta: any,
+      isSymLink: boolean = false,
+      destinationPath: string = null
+    ) => {
+      const slug = encodeURIComponent(
+        String(name)
+          .replace(/\W+(?!$)/g, '-')
+          .toLowerCase()
+          .replace(/\W$/, '')
+      );
+      const exists = await PowerWidgetNavItems.findOne({
+        namespace,
+        parentPath,
+        slug,
+      });
+
+      if (Boolean(exists)) {
+        throw new Error(
+          `slug ${slug} already exists in parent path ${parentPath}`
+        );
+      }
+
+      const item = new PowerWidgetNavItems({
+        namespace,
+        parentPath,
+        name,
+        type,
+        meta,
+        slug,
+        isSymLink,
+        destinationPath,
+        path: path.posix.join(parentPath, slug),
+      });
+
+      await item.save();
+
+      return item;
+    };
+
+    const createShortcut = async (
+      namespace: string,
+      sourcePath: string,
+      destinationPath: string,
+      itemName: string
+    ) => {
+      const sourceItem = (await PowerWidgetNavItems.findOne({
+        namespace,
+        path: sourcePath,
+      })) as any;
+
+      if (!sourceItem) {
+        throw new Error(
+          `Source not found '${sourcePath}' at ns '${namespace}'`
+        );
+      }
+      return addItem(
+        namespace,
+        destinationPath,
+        itemName,
+        sourceItem.type,
+        sourceItem.meta,
+        true,
+        sourceItem.path
+      );
     };
 
     /** Fetch content */
@@ -172,40 +378,47 @@ export function createDynamicsV2Services(
         opts.defineLogic(async (opts) => {
           const { namespace, parentPath, name, type, meta } = opts.args.input;
 
-          const slug = encodeURIComponent(
-            String(name)
-              .replace(/\W+(?!$)/g, '-')
-              .toLowerCase()
-              .replace(/\W$/, '')
-          );
-          const exists = await PowerWidgetNavItems.findOne({
-            namespace,
-            parentPath,
-            slug,
-          });
-
-          if (Boolean(exists)) {
-            return opts.error(
-              new Error(
-                `slug ${slug} already exists in parent path ${parentPath}`
-              ),
-              400
-            );
+          try {
+            const item = await addItem(namespace, parentPath, name, type, meta);
+            return opts.success({}, [item]);
+          } catch (e) {
+            return opts.error(e, 400);
           }
+        });
+      })
+    );
 
-          const item = new PowerWidgetNavItems({
+    /** Add shortcut */
+    useService(
+      defineService('powerserver___add-shortcut', (opts) => {
+        opts.defineValidator(
+          Joi.object({
+            namespace: Joi.string().required(),
+            sourcePath: Joi.string(),
+            destinationPath: Joi.string(),
+            itemName: Joi.string(),
+          })
+        );
+
+        opts.defineLogic(async (opts) => {
+          const {
             namespace,
-            parentPath,
-            name,
-            type,
-            meta,
-            slug,
-            path: path.join(parentPath, slug),
-          });
+            sourcePath,
+            destinationPath,
+            itemName,
+          } = opts.args.input;
 
-          await item.save();
-
-          return opts.success({}, [item]);
+          try {
+            const item = await createShortcut(
+              namespace,
+              sourcePath,
+              destinationPath,
+              itemName
+            );
+            return opts.success({}, [item]);
+          } catch (e) {
+            return opts.error(e, 400);
+          }
         });
       })
     );
@@ -225,7 +438,7 @@ export function createDynamicsV2Services(
         opts.defineLogic(async (opts) => {
           const { namespace, path, meta, security } = opts.args.input;
 
-          await PowerWidgetNavItems.updateOne(
+          const op = await PowerWidgetNavItems.updateOne(
             {
               namespace,
               path,
@@ -238,48 +451,24 @@ export function createDynamicsV2Services(
             }
           );
 
-          return opts.success({ ack: true }, []);
+          /** Update all shortcuts */
+          await PowerWidgetNavItems.updateMany(
+            {
+              namespace,
+              destinationPath: path,
+              isSymLink: true,
+            },
+            {
+              $set: {
+                meta,
+              },
+            }
+          );
+
+          return opts.success({ ack: true, op }, []);
         });
       })
     );
-
-    const getFullFileCollectionName = (ns: string, collName: string) => {
-      return `dyn_${ns}_${collName}`;
-    };
-
-    const deleteOnePath = async (namespace: string, path: string) => {
-      const allItemsToDelete = await PowerWidgetNavItems.find({
-        namespace,
-        parentPath: new RegExp(`^${path}`),
-      });
-
-      const itemToDelete = (await PowerWidgetNavItems.findOne({
-        namespace,
-        path,
-      })) as any;
-
-      const allItems = [...allItemsToDelete, itemToDelete];
-
-      for (const item of allItems) {
-        const shouldDeleteFile = Boolean(item?.meta?.fileCollectionName);
-        if (shouldDeleteFile) {
-          const fileCollectionName = item?.meta?.fileCollectionName;
-          const collName = getFullFileCollectionName(
-            namespace,
-            fileCollectionName
-          );
-          await mongooseConnection.db.collection(collName).deleteOne({
-            _id: item._id,
-          });
-        }
-
-        await item.delete();
-      }
-
-      return {
-        path,
-      };
-    };
 
     /** Remove items */
     useService(
@@ -315,70 +504,29 @@ export function createDynamicsV2Services(
           Joi.object({
             namespace: Joi.string().required(),
             path: Joi.string().required(),
+            newParentPath: Joi.string().optional().allow(null),
             newName: Joi.string().required(),
           })
         );
 
         opts.defineLogic(async (opts) => {
-          const { namespace, path: _path, newName } = opts.args.input;
-
-          const exists = (await PowerWidgetNavItems.findOne({
+          const {
             namespace,
             path: _path,
-          })) as any;
-
-          if (!exists) {
-            return opts.error(new Error('Item not found by path'), 404);
-          }
-
-          const needRename = newName !== exists.name;
-
-          const newSlug = needRename
-            ? encodeURIComponent(
-                String(newName)
-                  .replace(/\W+(?!$)/g, '-')
-                  .toLowerCase()
-                  .replace(/\W$/, '')
-              )
-            : exists.slug;
-
-          const newPath = needRename
-            ? path.join(exists.parentPath, newSlug)
-            : exists.path;
-
-          if (needRename) {
-            const newPathExists = (await PowerWidgetNavItems.findOne({
+            newParentPath,
+            newName,
+          } = opts.args.input;
+          try {
+            const res = await renameItem(
               namespace,
-              path: newPath,
-            })) as any;
-
-            if (newPathExists) {
-              return opts.error(
-                new Error('Item with same name already exists in the folder'),
-                404
-              );
-            }
-
-            /** Update path and slug */
-            exists.path = newPath;
-            exists.slug = newSlug;
-            exists.name = newName;
-            await exists.save();
-
-            /** Update all child items */
-            const allChildItems = (await PowerWidgetNavItems.find({
-              namespace,
-              parentPath: new RegExp(`^${_path}`),
-            })) as any[];
-
-            for (const item of allChildItems) {
-              item.path = String(item.path).replace(_path, newPath);
-              item.parentPath = String(item.parentPath).replace(_path, newPath);
-              await item.save();
-            }
+              _path,
+              newParentPath,
+              newName
+            );
+            return opts.success({ ack: true, ...res }, []);
+          } catch (e) {
+            return opts.error(e, 400);
           }
-
-          return opts.success({ ack: true, newPath, newSlug }, []);
         });
       })
     );

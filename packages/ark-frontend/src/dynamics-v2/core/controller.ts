@@ -9,6 +9,8 @@ export type Item = {
   meta: any;
   security: any;
   slug: string;
+  isSymLink: boolean;
+  destinationPath: string;
 };
 
 export type Response = {
@@ -47,12 +49,25 @@ export class ControllerNamespace {
     return this.controller.create(this.name, parentPath, name, type, meta);
   }
 
+  async createShortcut(
+    sourcePath: string,
+    destinationPath: string,
+    itemName: string
+  ) {
+    return this.controller.createShortcut(
+      this.name,
+      sourcePath,
+      destinationPath,
+      itemName
+    );
+  }
+
   update(path: string, meta: any, security: any) {
     return this.controller.update(this.name, path, meta, security);
   }
 
-  rename(path: string, newName: string) {
-    return this.controller.rename(this.name, path, newName);
+  rename(path: string, newParentPath: string, newName: string) {
+    return this.controller.rename(this.name, path, newParentPath, newName);
   }
 
   deleteMany(paths: string[]) {
@@ -129,6 +144,25 @@ export class Controller {
     return res.data.meta;
   }
 
+  async createShortcut(
+    ns: string,
+    sourcePath: string,
+    destinationPath: string,
+    itemName: string
+  ) {
+    const res = await axios.post(
+      '/___service/main/powerserver___add-shortcut',
+      {
+        namespace: ns,
+        sourcePath,
+        destinationPath,
+        itemName,
+      }
+    );
+
+    return res.data;
+  }
+
   async create(
     ns: string,
     parentPath: string,
@@ -158,10 +192,16 @@ export class Controller {
     return res.data;
   }
 
-  async rename(ns: string, path: string, newName: string) {
+  async rename(
+    ns: string,
+    path: string,
+    newParentPath: string,
+    newName: string
+  ) {
     const res = await axios.post('/___service/main/powerserver___rename-item', {
       namespace: ns,
       path,
+      newParentPath,
       newName,
     });
 

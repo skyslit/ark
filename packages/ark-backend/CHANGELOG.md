@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.35.0](https://github.com/skyslit/ark/compare/v2.34.0...v2.35.0) (2023-05-24)
+
+
+### Features
+
+* added support for shortcuts and item movement ([be4d606](https://github.com/skyslit/ark/commit/be4d6064ec04cb7729605345bc1c168aced27004))
+
+
+
+
+
 # [2.34.0](https://github.com/skyslit/ark/compare/v2.33.0...v2.34.0) (2023-05-22)
 
 

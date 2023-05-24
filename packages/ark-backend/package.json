@@ -1,6 +1,6 @@
 {
   "name": "@skyslit/ark-backend",
-  "version": "2.34.0",
+  "version": "2.35.0",
   "description": "A business framework for building Ark based event driven backend application",
   "main": "./build/index.js",
   "private": false,
@@ -25,7 +25,7 @@
     "@babel/preset-react": "^7.12.7",
     "@babel/preset-typescript": "^7.12.1",
     "@skyslit/ark-core": "^2.31.7",
-    "@skyslit/ark-frontend": "^2.34.0",
+    "@skyslit/ark-frontend": "^2.35.0",
     "@types/cookie-parser": "^1.4.2",
     "@types/express": "^4.17.9",
     "@types/jest": "^26.0.15",

@@ -10,7 +10,7 @@ type PermissionResult = {
 };
 
 export type IDynamicsPermissionDataStore = {
-  getItems: (paths: string[]) => Promise<any[]>;
+  getItems: (ns: string, paths: string[]) => Promise<any[]>;
 };
 
 export const extractPaths = (path: string = ''): string[] => {
@@ -30,7 +30,8 @@ export const extractPaths = (path: string = ''): string[] => {
 };
 
 function inheritPermissions(items: any[]): any[] {
-  let bufferedPermissions: any = [];
+  let ownershipBuffer: any[] = [];
+  let bufferedPermissions: any[] = [];
 
   for (const item of items) {
     if (
@@ -38,6 +39,24 @@ function inheritPermissions(items: any[]): any[] {
       item?.security?.permissions?.length > 0
     ) {
       bufferedPermissions = item.security.permissions;
+
+      /** Buffer owners */
+      const ownerships: any[] = item.security.permissions.filter(
+        (p) => p.access === 'owner'
+      );
+      ownerships.forEach((owner) => {
+        const similarUserOwner = ownershipBuffer.find(
+          (o) => o.type === 'user' && o.userEmail === owner.userEmail
+        );
+        if (!similarUserOwner) {
+          const similarPolicyOwner = ownershipBuffer.find(
+            (o) => o.type === 'policy' && o.policy === owner.policy
+          );
+          if (!similarPolicyOwner) {
+            ownershipBuffer.push(owner);
+          }
+        }
+      });
     } else {
       if (!item?.security) {
         item.security = {
@@ -46,6 +65,20 @@ function inheritPermissions(items: any[]): any[] {
       }
 
       item.security.permissions = bufferedPermissions;
+    }
+
+    /** Apply inherited ownerships */
+    for (const owner of ownershipBuffer) {
+      const foundAMatchingOwner = item.security.permissions.find(
+        (p) =>
+          p.access === 'owner' &&
+          p.type === owner.type &&
+          p.policy === owner.policy &&
+          p.userEmail === owner.userEmail
+      );
+      if (!foundAMatchingOwner) {
+        item.security.permissions.unshift(owner);
+      }
     }
   }
 
@@ -60,7 +93,7 @@ export const getItemPermission = async (
 ): Promise<PermissionResult> => {
   const paths = extractPaths(path);
 
-  let items = await store.getItems(paths);
+  let items = await store.getItems(ns, paths);
   items = inheritPermissions(items);
 
   const currentItem = items[items.length - 1] || null;
@@ -82,8 +115,13 @@ export const getItemPermission = async (
       permissions = currentItem?.security?.permissions.filter((p) => {
         switch (p?.type) {
           case 'user': {
-            if (p?.userEmail) {
-              return p?.userEmail === user?.emailAddress;
+            const shouldCheckEmail = Boolean(p?.userEmail);
+            if (shouldCheckEmail === true) {
+              if (p?.userEmail) {
+                return p?.userEmail === user?.emailAddress;
+              }
+            } else {
+              return Boolean(user);
             }
 
             break;

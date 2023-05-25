@@ -100,8 +100,9 @@ export function createDynamicsV2Services(
     );
 
     const permissionDataServer: IDynamicsPermissionDataStore = {
-      async getItems(paths) {
+      async getItems(ns, paths) {
         const items = (await PowerWidgetNavItems.find({
+          namespace: ns,
           path: {
             $in: paths,
           },
@@ -307,6 +308,146 @@ export function createDynamicsV2Services(
       );
     };
 
+    const updateItemMeta = async (
+      namespace: string,
+      path: string,
+      meta: any
+    ) => {
+      const item = (await PowerWidgetNavItems.findOne({
+        namespace,
+        path,
+      })) as any;
+
+      if (!item) {
+        return false;
+      }
+
+      /** Ignore shortcut */
+      if (item.isSymLink === true) {
+        return false;
+      }
+
+      const op = await PowerWidgetNavItems.updateOne(
+        {
+          namespace,
+          path,
+        },
+        {
+          $set: {
+            meta,
+          },
+        }
+      );
+
+      /** Update all shortcuts */
+      await PowerWidgetNavItems.updateMany(
+        {
+          namespace,
+          destinationPath: path,
+          isSymLink: true,
+        },
+        {
+          $set: {
+            meta,
+          },
+        }
+      );
+
+      return op;
+    };
+
+    const updateItemSecurity = async (
+      namespace: string,
+      path: string,
+      security: any
+    ) => {
+      const item = (await PowerWidgetNavItems.findOne({
+        namespace,
+        path,
+      })) as any;
+
+      if (!item) {
+        return false;
+      }
+
+      /** Ignore shortcut */
+      if (item.isSymLink === true) {
+        return false;
+      }
+
+      const op = await PowerWidgetNavItems.updateOne(
+        {
+          namespace,
+          path,
+        },
+        {
+          $set: {
+            security,
+          },
+        }
+      );
+
+      return op;
+    };
+
+    const readFile = async (namespace: string, filePath: string) => {
+      const item = (await PowerWidgetNavItems.findOne({
+        namespace,
+        path: filePath,
+      }).exec()) as any;
+
+      let content = null;
+
+      if (item) {
+        const fileCollectionName = item?.meta?.fileCollectionName || 'default';
+        const collName = getFullFileCollectionName(
+          namespace,
+          fileCollectionName
+        );
+
+        content = await mongooseConnection.db.collection(collName).findOne({
+          _id: item._id,
+        });
+      }
+
+      return content;
+    };
+
+    const writeFile = async (
+      namespace: string,
+      filePath: string,
+      content: any
+    ) => {
+      const item = (await PowerWidgetNavItems.findOne({
+        namespace,
+        path: filePath,
+      }).exec()) as any;
+
+      let writeOp = null;
+
+      if (item) {
+        const fileCollectionName = item?.meta?.fileCollectionName || 'default';
+        const collName = getFullFileCollectionName(
+          namespace,
+          fileCollectionName
+        );
+
+        delete content._id;
+
+        writeOp = await mongooseConnection.db.collection(collName).updateOne(
+          {
+            _id: item._id,
+          },
+          {
+            $set: content,
+          },
+          { upsert: true }
+        );
+      }
+
+      return writeOp;
+    };
+
     /** Fetch content */
     useService(
       defineService('powerserver___fetch-content', (opts) => {
@@ -326,6 +467,7 @@ export function createDynamicsV2Services(
             opts.args.user,
             permissionDataServer
           );
+
           if (permissionResult?.claims?.read !== true) {
             return opts.error(new Error('Unauthorized'), 401);
           }
@@ -378,6 +520,17 @@ export function createDynamicsV2Services(
         opts.defineLogic(async (opts) => {
           const { namespace, parentPath, name, type, meta } = opts.args.input;
 
+          const permissionResult = await getItemPermission(
+            namespace,
+            parentPath,
+            opts.args.user,
+            permissionDataServer
+          );
+
+          if (permissionResult?.claims?.write !== true) {
+            return opts.error(new Error('Unauthorized'), 401);
+          }
+
           try {
             const item = await addItem(namespace, parentPath, name, type, meta);
             return opts.success({}, [item]);
@@ -407,6 +560,17 @@ export function createDynamicsV2Services(
             destinationPath,
             itemName,
           } = opts.args.input;
+
+          const permissionResult = await getItemPermission(
+            namespace,
+            destinationPath,
+            opts.args.user,
+            permissionDataServer
+          );
+
+          if (permissionResult?.claims?.write !== true) {
+            return opts.error(new Error('Unauthorized'), 401);
+          }
 
           try {
             const item = await createShortcut(
@@ -438,34 +602,30 @@ export function createDynamicsV2Services(
         opts.defineLogic(async (opts) => {
           const { namespace, path, meta, security } = opts.args.input;
 
-          const op = await PowerWidgetNavItems.updateOne(
-            {
+          const permissionResult = await getItemPermission(
+            namespace,
+            path,
+            opts.args.user,
+            permissionDataServer
+          );
+
+          if (permissionResult?.claims?.write !== true) {
+            return opts.error(new Error('Unauthorized'), 401);
+          }
+
+          const updateOp = await updateItemMeta(namespace, path, meta);
+          let securityUpdateOp = null;
+
+          /** Allow security update only for owner */
+          if (permissionResult?.claims?.owner === true) {
+            securityUpdateOp = await updateItemSecurity(
               namespace,
               path,
-            },
-            {
-              $set: {
-                meta,
-                security,
-              },
-            }
-          );
+              security
+            );
+          }
 
-          /** Update all shortcuts */
-          await PowerWidgetNavItems.updateMany(
-            {
-              namespace,
-              destinationPath: path,
-              isSymLink: true,
-            },
-            {
-              $set: {
-                meta,
-              },
-            }
-          );
-
-          return opts.success({ ack: true, op }, []);
+          return opts.success({ ack: true, updateOp, securityUpdateOp }, []);
         });
       })
     );
@@ -486,6 +646,17 @@ export function createDynamicsV2Services(
           let responses: any[] = [];
           for (const path of paths) {
             try {
+              const permissionResult = await getItemPermission(
+                namespace,
+                path,
+                opts.args.user,
+                permissionDataServer
+              );
+
+              if (permissionResult?.claims?.owner !== true) {
+                return opts.error(new Error('Unauthorized'), 401);
+              }
+
               responses.push(await deleteOnePath(namespace, path));
             } catch (e) {
               console.error(e);
@@ -517,6 +688,17 @@ export function createDynamicsV2Services(
             newName,
           } = opts.args.input;
           try {
+            const permissionResult = await getItemPermission(
+              namespace,
+              _path,
+              opts.args.user,
+              permissionDataServer
+            );
+
+            if (permissionResult?.claims?.write !== true) {
+              return opts.error(new Error('Unauthorized'), 401);
+            }
+
             const res = await renameItem(
               namespace,
               _path,
@@ -544,25 +726,18 @@ export function createDynamicsV2Services(
         opts.defineLogic(async (opts) => {
           const { namespace, filePath } = opts.args.input;
 
-          const item = (await PowerWidgetNavItems.findOne({
+          const permissionResult = await getItemPermission(
             namespace,
-            path: filePath,
-          }).exec()) as any;
+            filePath,
+            opts.args.user,
+            permissionDataServer
+          );
 
-          let content = null;
-
-          if (item) {
-            const fileCollectionName =
-              item?.meta?.fileCollectionName || 'default';
-            const collName = getFullFileCollectionName(
-              namespace,
-              fileCollectionName
-            );
-
-            content = await mongooseConnection.db.collection(collName).findOne({
-              _id: item._id,
-            });
+          if (permissionResult?.claims?.read !== true) {
+            return opts.error(new Error('Unauthorized'), 401);
           }
+
+          let content = await readFile(namespace, filePath);
 
           return opts.success(
             { ack: true, namespace, content: content || {} },
@@ -586,36 +761,18 @@ export function createDynamicsV2Services(
         opts.defineLogic(async (opts) => {
           const { namespace, filePath, content } = opts.args.input;
 
-          const item = (await PowerWidgetNavItems.findOne({
+          const permissionResult = await getItemPermission(
             namespace,
-            path: filePath,
-          }).exec()) as any;
+            filePath,
+            opts.args.user,
+            permissionDataServer
+          );
 
-          let writeOp = null;
-
-          if (item) {
-            const fileCollectionName =
-              item?.meta?.fileCollectionName || 'default';
-            const collName = getFullFileCollectionName(
-              namespace,
-              fileCollectionName
-            );
-
-            delete content._id;
-
-            writeOp = await mongooseConnection.db
-              .collection(collName)
-              .updateOne(
-                {
-                  _id: item._id,
-                },
-                {
-                  $set: content,
-                },
-                { upsert: true }
-              );
+          if (permissionResult?.claims?.write !== true) {
+            return opts.error(new Error('Unauthorized'), 401);
           }
 
+          const writeOp = await writeFile(namespace, filePath, content);
           return opts.success({ ack: true, namespace, writeOp }, []);
         });
       })

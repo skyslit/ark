@@ -209,15 +209,16 @@ function createCatalogue(props: PropType): CatalogueApi {
         setItems((items) =>
           items
             .filter((item) => {
-              const shouldRemove = paths.indexOf(item.path);
-              return shouldRemove;
+              const shouldRemove = paths.indexOf(item.path) > -1;
+              return shouldRemove === false;
             })
             .filter((item) => {
               if (item?.isSymLink === true) {
                 const shouldRemove = paths.some((removedPath) => {
-                  return removedPath.startsWith(item.destinationPath);
+                  return item.destinationPath.startsWith(removedPath);
                 });
-                return shouldRemove;
+
+                return shouldRemove === false;
               }
 
               return true;
@@ -305,8 +306,8 @@ function createCatalogue(props: PropType): CatalogueApi {
       namespace
         .fetch(path)
         .then((res) => {
+          setDirLoading(false);
           if (res.currentDir && res.items) {
-            setDirLoading(false);
             setCurrentDir(res.currentDir);
             setItems(res.items);
             setClaims(res.claims);
@@ -409,30 +410,46 @@ type CatalogueService = {
 };
 
 export function useCataloguePath(
+  id: string,
   ns: string,
   path: string,
-  autoFetch: boolean = true
+  autoFetch: boolean = true,
+  useRedux: boolean = false
 ): CatalogueService {
-  const [loaded, setLoaded] = React.useState<boolean>(false);
-  const [response, setResponse] = React.useState<Response>(null);
+  const { use } = useArkReactServices();
+  const { useStore } = use(Frontend);
+  const [loaded, setLoaded] = useStore<boolean>(
+    `use-catalogue-path-${id}-loaded`,
+    false,
+    useRedux === false
+  );
+  const [response, setResponse] = useStore<Response>(
+    id,
+    null,
+    useRedux === false
+  );
 
   React.useEffect(() => {
-    setLoaded(false);
-    setResponse(null);
-
     if (autoFetch === true) {
       refresh();
     }
   }, [ns, path]);
 
   const refresh = React.useCallback(
-    async (f = false) => {
+    async (force = false) => {
+      if (loaded === true && force === false) {
+        return;
+      }
+
+      setLoaded(false);
+      setResponse(null);
+
       return controller.fetch(ns, path).then((res) => {
         setResponse(res);
         setLoaded(true);
       });
     },
-    [ns, path]
+    [ns, path, loaded]
   );
 
   return {

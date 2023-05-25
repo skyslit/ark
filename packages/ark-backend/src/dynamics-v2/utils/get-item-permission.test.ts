@@ -54,7 +54,7 @@ test('common usage > user > read access: should', async () => {
     '/test/hello',
     { emailAddress: 'dz@skyslit.com' },
     {
-      async getItems(paths) {
+      async getItems(ns, paths) {
         return getItemsByPaths(paths, [
           {
             path: '/',
@@ -103,7 +103,7 @@ test('common usage > user > read access: should not', async () => {
     '/test/hello',
     { emailAddress: 'dz@skyslit.com' },
     {
-      async getItems(paths) {
+      async getItems(ns, paths) {
         return getItemsByPaths(paths, [
           {
             path: '/',
@@ -155,7 +155,7 @@ test('inherited usage > policy > write access: should', async () => {
       policies: ['sample-policy', 'test-policy'],
     },
     {
-      async getItems(paths) {
+      async getItems(ns, paths) {
         return getItemsByPaths(paths, [
           {
             path: '/',
@@ -207,7 +207,7 @@ test('inherited usage > public > write access: should', async () => {
       policies: ['sample-policy', 'test-policy'],
     },
     {
-      async getItems(paths) {
+      async getItems(ns, paths) {
         return getItemsByPaths(paths, [
           {
             path: '/',
@@ -259,7 +259,7 @@ test('common usage > super admin > owner access: should', async () => {
       policies: ['sample-policy', 'test-policy', 'SUPER_ADMIN'],
     },
     {
-      async getItems(paths) {
+      async getItems(ns, paths) {
         return getItemsByPaths(paths, [
           {
             path: '/',
@@ -297,7 +297,7 @@ test('common usage > super admin > owner access: should', async () => {
 
 test('common usage > null user > write access: should', async () => {
   const permission = await getItemPermission('default', '/test/hello', null, {
-    async getItems(paths) {
+    async getItems(ns, paths) {
       return getItemsByPaths(paths, [
         {
           path: '/',

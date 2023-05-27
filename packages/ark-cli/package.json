@@ -1,7 +1,7 @@
 {
-  "name": "@skyslit/arkify",
+  "name": "@skyslit/ark",
   "version": "2.37.1",
-  "description": "Arkify uses Ark DevTools to build and automate Ark Application development process",
+  "description": "Ark CLI uses Ark DevTools to build and automate Ark Application development process",
   "main": "./build/index.js",
   "private": false,
   "scripts": {

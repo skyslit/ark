@@ -49,9 +49,9 @@ export default (cwd_?: string) => {
         }),
     },
     {
-      title: 'upgrade @skyslit/arkify',
+      title: 'upgrade @skyslit/ark',
       task: () =>
-        runCommand('upgrading...', `${packager} update @skyslit/arkify; exit`, {
+        runCommand('upgrading...', `${packager} update @skyslit/ark; exit`, {
           cwd: cwd,
         }),
     },

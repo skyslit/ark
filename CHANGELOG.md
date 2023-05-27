@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.37.0](https://github.com/skyslit/ark/compare/v2.36.0...v2.37.0) (2023-05-27)
+
+
+### Features
+
+* added dynamics base support + renamed fpz to arkify ([a9aeee7](https://github.com/skyslit/ark/commit/a9aeee7359826be063852b94fb02506a40833856))
+
+
+
+
+
 # [2.36.0](https://github.com/skyslit/ark/compare/v2.35.0...v2.36.0) (2023-05-25)
 
 

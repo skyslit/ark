@@ -25,8 +25,6 @@ test(
     // @ts-ignore
     inquirer.prompt = jest.fn().mockResolvedValue({
       projectName: 'cool-project',
-      requireAdminDashboard: true,
-      projectType: 'full-stack application',
     });
 
     const log = console.log;
@@ -39,7 +37,7 @@ test(
         );
 
         // Assert package name
-        expect(packageJsonFile.name).toEqual('cool-project');
+        expect(packageJsonFile.name).toEqual('cool_project');
 
         console.log = log;
         done();

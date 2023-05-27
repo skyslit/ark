@@ -1,7 +1,7 @@
 {
-  "name": "fpz",
+  "name": "arkify",
   "version": "2.36.0",
-  "description": "FreePizza CLI uses Ark DevTools to build and automate Ark Application development process",
+  "description": "Arkify uses Ark DevTools to build and automate Ark Application development process",
   "main": "./build/index.js",
   "private": false,
   "scripts": {
@@ -19,7 +19,6 @@
     }
   ],
   "bin": {
-    "fpz": "build/index.js",
     "ark": "build/index.js"
   },
   "devDependencies": {
@@ -27,16 +26,19 @@
     "@types/command-line-args": "^5.0.0",
     "@types/command-line-usage": "^5.0.1",
     "@types/ejs": "^3.0.5",
+    "@types/gunzip-maybe": "^1.4.0",
     "@types/ini": "^1.3.30",
     "@types/inquirer": "^7.3.1",
     "@types/jest": "^26.0.19",
     "@types/jsonwebtoken": "^9.0.0",
     "@types/listr": "^0.14.2",
     "@types/ncp": "^2.0.4",
+    "@types/node-fetch": "^2.6.4",
     "@types/prettier": "2.2.1",
     "@types/react": "^16.0.1",
     "@types/rimraf": "^3.0.0",
     "@types/semver": "^7.3.4",
+    "@types/tar-fs": "^2.0.1",
     "memfs": "^3.2.0",
     "react": "^16.0.1"
   },
@@ -54,11 +56,13 @@
     "console-clear": "^1.1.1",
     "ejs": "^3.1.8",
     "execa": "^5.0.0",
+    "gunzip-maybe": "^1.4.2",
     "ini": "^2.0.0",
     "inquirer": "^7.3.3",
     "jsonwebtoken": "^9.0.0",
     "listr": "^0.14.3",
     "ncp": "^2.0.0",
+    "node-fetch": "^2.0.0",
     "node-pty": "^0.10.0",
     "prettier": "2.2.1",
     "rimraf": "^3.0.2",
@@ -66,6 +70,7 @@
     "semver": "^7.3.4",
     "simple-git": "^2.34.2",
     "strip-indent": "^3.0.0",
+    "tar-fs": "^2.1.1",
     "tiny-glob": "^0.2.8"
   },
   "publishConfig": {

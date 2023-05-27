@@ -48,6 +48,13 @@ export default (cwd_?: string) => {
           cwd: cwd,
         }),
     },
+    {
+      title: 'upgrade arkify',
+      task: () =>
+        runCommand('upgrading...', `${packager} update arkify; exit`, {
+          cwd: cwd,
+        }),
+    },
   ]);
 
   return Promise.resolve()

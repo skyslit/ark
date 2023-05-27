@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.37.1](https://github.com/skyslit/ark/compare/v2.37.0...v2.37.1) (2023-05-27)
+
+
+### Bug Fixes
+
+* renamed arkify to @skyslit/arkify ([2b2681f](https://github.com/skyslit/ark/commit/2b2681f34bb8771d499050c7f318307aee402ba9))
+
+
+
+
+
 # [2.37.0](https://github.com/skyslit/ark/compare/v2.36.0...v2.37.0) (2023-05-27)
 
 ### Features

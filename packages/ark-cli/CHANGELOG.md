@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.37.2](https://github.com/skyslit/ark/compare/v2.37.1...v2.37.2) (2023-05-27)
+
+
+### Bug Fixes
+
+* updated cli package name ([2f9ad57](https://github.com/skyslit/ark/commit/2f9ad57b0098b7237aaf76bf7e77705e0488367c))
+
+
+
+
+
 ## [2.37.1](https://github.com/skyslit/ark/compare/v2.37.0...v2.37.1) (2023-05-27)
 
 

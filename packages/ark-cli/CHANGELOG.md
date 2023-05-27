@@ -3,306 +3,165 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.37.0](https://github.com/skyslit/ark/compare/v2.36.0...v2.37.0) (2023-05-27)
+
+### Features
+
+- added dynamics base support + renamed fpz to arkify ([a9aeee7](https://github.com/skyslit/ark/commit/a9aeee7359826be063852b94fb02506a40833856))
+
 # [2.36.0](https://github.com/skyslit/ark/compare/v2.35.0...v2.36.0) (2023-05-25)
 
 **Note:** Version bump only for package fpz
-
-
-
-
 
 # [2.35.0](https://github.com/skyslit/ark/compare/v2.34.0...v2.35.0) (2023-05-24)
 
 **Note:** Version bump only for package fpz
 
-
-
-
-
 # [2.34.0](https://github.com/skyslit/ark/compare/v2.33.0...v2.34.0) (2023-05-22)
 
 **Note:** Version bump only for package fpz
-
-
-
-
 
 # [2.33.0](https://github.com/skyslit/ark/compare/v2.32.3...v2.33.0) (2023-05-21)
 
 **Note:** Version bump only for package fpz
 
-
-
-
-
 ## [2.32.3](https://github.com/skyslit/ark/compare/v2.32.2...v2.32.3) (2023-05-05)
-
 
 ### Bug Fixes
 
-* issue with Docker build ([fcb8034](https://github.com/skyslit/ark/commit/fcb8034cf2fe04da6815208f839cc2901b8956a1))
-
-
-
-
+- issue with Docker build ([fcb8034](https://github.com/skyslit/ark/commit/fcb8034cf2fe04da6815208f839cc2901b8956a1))
 
 ## [2.32.2](https://github.com/skyslit/ark/compare/v2.32.1...v2.32.2) (2023-04-10)
 
 **Note:** Version bump only for package fpz
 
-
-
-
-
 ## [2.32.1](https://github.com/skyslit/ark/compare/v2.32.0...v2.32.1) (2023-04-03)
 
 **Note:** Version bump only for package fpz
 
-
-
-
-
 # [2.32.0](https://github.com/skyslit/ark/compare/v2.31.7...v2.32.0) (2023-04-03)
-
 
 ### Features
 
-* added support for passthru env variable ([f7e902b](https://github.com/skyslit/ark/commit/f7e902b61eae6c1e364aa6c3df6e0195b05107b0))
-
-
-
-
+- added support for passthru env variable ([f7e902b](https://github.com/skyslit/ark/commit/f7e902b61eae6c1e364aa6c3df6e0195b05107b0))
 
 ## 2.31.7 (2023-03-16)
 
-
 ### Bug Fixes
 
-* issue with versioning ([25fb61e](https://github.com/skyslit/ark-2/commit/25fb61e49aefba97f8ce8a16ce09d0f2228ae5d1))
-
-
-
-
+- issue with versioning ([25fb61e](https://github.com/skyslit/ark-2/commit/25fb61e49aefba97f8ce8a16ce09d0f2228ae5d1))
 
 ## [2.31.5](https://github.com/skyslit/ark/compare/v2.31.4...v2.31.5) (2023-02-25)
 
 **Note:** Version bump only for package fpz
 
-
-
-
-
 ## [2.31.4](https://github.com/skyslit/ark/compare/v2.31.3...v2.31.4) (2023-02-24)
 
 **Note:** Version bump only for package fpz
-
-
-
-
 
 ## [2.31.3](https://github.com/skyslit/ark/compare/v2.31.2...v2.31.3) (2023-02-23)
 
 **Note:** Version bump only for package fpz
 
-
-
-
-
 ## [2.31.2](https://github.com/skyslit/ark/compare/v2.31.1...v2.31.2) (2023-02-03)
 
 **Note:** Version bump only for package fpz
-
-
-
-
 
 ## [2.31.1](https://github.com/skyslit/ark/compare/v2.31.0...v2.31.1) (2023-02-02)
 
 **Note:** Version bump only for package fpz
 
-
-
-
-
 # [2.31.0](https://github.com/skyslit/ark/compare/v2.30.0...v2.31.0) (2023-02-02)
 
 **Note:** Version bump only for package fpz
 
-
-
-
-
 # [2.30.0](https://github.com/skyslit/ark/compare/v2.29.5...v2.30.0) (2022-12-27)
-
 
 ### Features
 
-* added jwt blacklist support + user simulation for dev ([778f6ce](https://github.com/skyslit/ark/commit/778f6ced2e45b29ad4f200ef7b0d64b9cf4d0740))
-
-
-
-
+- added jwt blacklist support + user simulation for dev ([778f6ce](https://github.com/skyslit/ark/commit/778f6ced2e45b29ad4f200ef7b0d64b9cf4d0740))
 
 ## [2.29.5](https://github.com/skyslit/ark/compare/v2.29.4...v2.29.5) (2022-12-15)
 
 **Note:** Version bump only for package fpz
 
-
-
-
-
 ## [2.29.4](https://github.com/skyslit/ark/compare/v2.29.3...v2.29.4) (2022-12-11)
 
 **Note:** Version bump only for package fpz
-
-
-
-
 
 ## [2.29.3](https://github.com/skyslit/ark/compare/v2.29.2...v2.29.3) (2022-11-18)
 
 **Note:** Version bump only for package fpz
 
-
-
-
-
 ## [2.29.2](https://github.com/skyslit/ark/compare/v2.29.1...v2.29.2) (2022-10-24)
 
 **Note:** Version bump only for package fpz
-
-
-
-
 
 ## [2.29.1](https://github.com/skyslit/ark/compare/v2.29.0...v2.29.1) (2022-10-12)
 
 **Note:** Version bump only for package fpz
 
-
-
-
-
 # [2.29.0](https://github.com/skyslit/ark/compare/v2.28.1...v2.29.0) (2022-10-01)
 
 **Note:** Version bump only for package fpz
-
-
-
-
 
 ## [2.28.1](https://github.com/skyslit/ark/compare/v2.28.0...v2.28.1) (2022-09-28)
 
 **Note:** Version bump only for package fpz
 
-
-
-
-
 # [2.28.0](https://github.com/skyslit/ark/compare/v2.27.0...v2.28.0) (2022-09-24)
 
 **Note:** Version bump only for package fpz
-
-
-
-
 
 # [2.27.0](https://github.com/skyslit/ark/compare/v2.26.0...v2.27.0) (2022-06-27)
 
 **Note:** Version bump only for package fpz
 
-
-
-
-
 # [2.26.0](https://github.com/skyslit/ark/compare/v2.25.0...v2.26.0) (2022-05-30)
 
 **Note:** Version bump only for package fpz
-
-
-
-
 
 # [2.25.0](https://github.com/skyslit/ark/compare/v2.24.0...v2.25.0) (2022-05-29)
 
 **Note:** Version bump only for package fpz
 
-
-
-
-
 # [2.24.0](https://github.com/skyslit/ark/compare/v2.23.4...v2.24.0) (2022-05-27)
 
 **Note:** Version bump only for package fpz
 
-
-
-
-
 ## [2.23.4](https://github.com/skyslit/ark/compare/v2.23.3...v2.23.4) (2022-05-26)
-
 
 ### Bug Fixes
 
-* vulnerabilities in fpz ([a285793](https://github.com/skyslit/ark/commit/a2857931c6ecdc3aa052f8a1bf810e6243c67cc6))
-
-
-
-
+- vulnerabilities in fpz ([a285793](https://github.com/skyslit/ark/commit/a2857931c6ecdc3aa052f8a1bf810e6243c67cc6))
 
 ## [2.23.3](https://github.com/skyslit/ark/compare/v2.23.2...v2.23.3) (2022-04-09)
 
-
 ### Bug Fixes
 
-* welcome page boilerplate url updated ([edcff88](https://github.com/skyslit/ark/commit/edcff88e201661476386eac0dac3451f730b34fc))
-
-
-
-
+- welcome page boilerplate url updated ([edcff88](https://github.com/skyslit/ark/commit/edcff88e201661476386eac0dac3451f730b34fc))
 
 ## [2.23.2](https://github.com/skyslit/ark/compare/v2.23.1...v2.23.2) (2022-01-09)
 
 **Note:** Version bump only for package fpz
 
-
-
-
-
 ## [2.23.1](https://github.com/skyslit/ark/compare/v2.23.0...v2.23.1) (2022-01-09)
 
 **Note:** Version bump only for package fpz
-
-
-
-
 
 # [2.23.0](https://github.com/skyslit/ark/compare/v2.22.0...v2.23.0) (2022-01-08)
 
 **Note:** Version bump only for package fpz
 
-
-
-
-
 # [2.22.0](https://github.com/skyslit/ark/compare/v2.21.7...v2.22.0) (2022-01-07)
 
 **Note:** Version bump only for package fpz
 
-
-
-
-
 ## [2.21.7](https://github.com/skyslit/ark/compare/v2.21.2...v2.21.7) (2021-11-20)
-
 
 ### Bug Fixes
 
-* issue with json body parser limit ([8e2f81d](https://github.com/skyslit/ark/commit/8e2f81dfcfd47668a440e0b015a8e31456ccc848))
-
-
-
-
+- issue with json body parser limit ([8e2f81d](https://github.com/skyslit/ark/commit/8e2f81dfcfd47668a440e0b015a8e31456ccc848))
 
 ## [2.21.6](https://github.com/skyslit/ark/compare/v2.21.2...v2.21.6) (2021-11-20)
 

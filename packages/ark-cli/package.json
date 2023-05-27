@@ -1,5 +1,5 @@
 {
-  "name": "arkify",
+  "name": "@skyslit/arkify",
   "version": "2.36.0",
   "description": "Arkify uses Ark DevTools to build and automate Ark Application development process",
   "main": "./build/index.js",

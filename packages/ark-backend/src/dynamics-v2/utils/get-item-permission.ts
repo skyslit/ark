@@ -3,7 +3,7 @@ type Claim = {
   write: boolean;
   owner: boolean;
 };
-type PermissionResult = {
+export type PermissionResult = {
   claims: Claim;
   currentItem: any;
   pathItems: any[];

@@ -9,6 +9,7 @@ import Joi from 'joi';
 import path from 'path';
 import {
   IDynamicsPermissionDataStore,
+  PermissionResult,
   getItemPermission,
 } from './utils/get-item-permission';
 
@@ -78,6 +79,11 @@ export type FolderOperationsApi = {
     filePath: string,
     content: any
   ) => Promise<any>;
+  getItemPermission: (
+    ns: string,
+    path: string,
+    user: { emailAddress?: string; policies?: string[] }
+  ) => Promise<PermissionResult>;
 };
 
 export function createDynamicsV2Services(
@@ -559,6 +565,8 @@ export function createDynamicsV2Services(
       updateItemSecurity,
       readFile,
       writeFile,
+      getItemPermission: (ns, path, user) =>
+        getItemPermission(ns, path, user, permissionDataServer),
     };
 
     context.setData<FolderOperationsApi>(

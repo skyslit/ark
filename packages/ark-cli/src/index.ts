@@ -82,7 +82,7 @@ switch (mainCommand.command) {
         },
         {
           header: 'Usage',
-          content: '$ fpz <options> <command>',
+          content: '$ ark <options> <command>',
         },
         {
           header: 'Command List',
@@ -102,7 +102,7 @@ switch (mainCommand.command) {
             },
             {
               name: 'add',
-              summary: 'Integrates a fpz module with this project',
+              summary: 'Integrates an ark module with this project',
             },
             { name: 'publish', summary: 'Publish Ark Module to FreePizza.io' },
             {

@@ -3,7 +3,7 @@ import fs from 'fs';
 import path from 'path';
 import ini from 'ini';
 import chalk from 'chalk';
-import gitP from 'simple-git/promise';
+import gitP from 'simple-git';
 import inquirer from 'inquirer';
 import runCommand from '../utils/run-command';
 import ensureDir from '../utils/ensure-dir';

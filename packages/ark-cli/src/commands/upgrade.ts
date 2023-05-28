@@ -28,7 +28,7 @@ export default (argv?: string[]) => {
         },
         {
           header: 'Usage',
-          content: '$ fpz -u <option>',
+          content: '$ ark -u <option>',
         },
         {
           header: 'Options List',

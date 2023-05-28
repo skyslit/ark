@@ -4,7 +4,7 @@ import inquirer from 'inquirer';
 import fs from 'fs';
 import path from 'path';
 import ensureDir from '../utils/ensure-dir';
-import gitP from 'simple-git/promise';
+import gitP from 'simple-git';
 
 /**
  * Copy modified template file

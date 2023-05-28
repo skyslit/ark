@@ -340,7 +340,7 @@ export const runStart = (argv?: string[]) => {
         },
         {
           header: 'Usage',
-          content: '$ fpz start',
+          content: '$ ark start',
         },
       ])
     );
@@ -381,7 +381,7 @@ export const runBuild = (argv?: string[]) => {
         },
         {
           header: 'Usage',
-          content: '$ fpz build',
+          content: '$ ark build',
         },
       ])
     );

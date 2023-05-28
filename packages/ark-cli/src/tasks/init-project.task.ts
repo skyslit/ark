@@ -6,7 +6,7 @@ import rimraf from 'rimraf';
 import path from 'path';
 import chalk from 'chalk';
 import { Observable } from 'rxjs';
-import gitP from 'simple-git/promise';
+import gitP from 'simple-git';
 import runCommand from '../utils/run-command';
 import ensureDir from '../utils/ensure-dir';
 import ejs from 'ejs';
@@ -422,9 +422,13 @@ export default (cwd_?: string) => {
     {
       title: 'installing dependencies',
       task: () =>
-        runCommand(`using ${packager}...`, `${packager} install; exit;`, {
-          cwd,
-        }),
+        runCommand(
+          `using ${packager}... may take a while...`,
+          `${packager} install; exit;`,
+          {
+            cwd,
+          }
+        ),
     },
     {
       title: 'commit changes',

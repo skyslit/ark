@@ -3,258 +3,147 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
-# [2.36.0](https://github.com/skyslit/ark/compare/v2.35.0...v2.36.0) (2023-05-25)
+# [2.38.0](https://github.com/skyslit/ark/compare/v2.37.2...v2.38.0) (2023-05-28)
 
+**Note:** Version bump only for package @skyslit/ark-frontend
+
+# [2.36.0](https://github.com/skyslit/ark/compare/v2.35.0...v2.36.0) (2023-05-25)
 
 ### Features
 
-* added ownership inheritance ([7d7c4a6](https://github.com/skyslit/ark/commit/7d7c4a6ec9f6417be916eeb84fab7133644c03dd))
-
-
-
-
+- added ownership inheritance ([7d7c4a6](https://github.com/skyslit/ark/commit/7d7c4a6ec9f6417be916eeb84fab7133644c03dd))
 
 # [2.35.0](https://github.com/skyslit/ark/compare/v2.34.0...v2.35.0) (2023-05-24)
 
-
 ### Features
 
-* added support for shortcuts and item movement ([be4d606](https://github.com/skyslit/ark/commit/be4d6064ec04cb7729605345bc1c168aced27004))
-
-
-
-
+- added support for shortcuts and item movement ([be4d606](https://github.com/skyslit/ark/commit/be4d6064ec04cb7729605345bc1c168aced27004))
 
 # [2.34.0](https://github.com/skyslit/ark/compare/v2.33.0...v2.34.0) (2023-05-22)
 
-
 ### Features
 
-* added file properties support ([fcd8bcf](https://github.com/skyslit/ark/commit/fcd8bcfdc551345255857a52c6a0033447f4aea3))
-
-
-
-
+- added file properties support ([fcd8bcf](https://github.com/skyslit/ark/commit/fcd8bcfdc551345255857a52c6a0033447f4aea3))
 
 # [2.33.0](https://github.com/skyslit/ark/compare/v2.32.3...v2.33.0) (2023-05-21)
 
-
 ### Features
 
-* added dynamics v2 apis ([0e9db3d](https://github.com/skyslit/ark/commit/0e9db3ddc6f2e19843fbf058cdd560d338fb727b))
-
-
-
-
+- added dynamics v2 apis ([0e9db3d](https://github.com/skyslit/ark/commit/0e9db3ddc6f2e19843fbf058cdd560d338fb727b))
 
 ## [2.32.2](https://github.com/skyslit/ark/compare/v2.32.1...v2.32.2) (2023-04-10)
 
-
 ### Bug Fixes
 
-* issue with passthru env var in frontend ([caa6214](https://github.com/skyslit/ark/commit/caa621482dddaa7a45725c05169525a8706fdb93))
-
-
-
-
+- issue with passthru env var in frontend ([caa6214](https://github.com/skyslit/ark/commit/caa621482dddaa7a45725c05169525a8706fdb93))
 
 ## [2.32.1](https://github.com/skyslit/ark/compare/v2.32.0...v2.32.1) (2023-04-03)
 
 **Note:** Version bump only for package @skyslit/ark-frontend
 
-
-
-
-
 # [2.32.0](https://github.com/skyslit/ark/compare/v2.31.7...v2.32.0) (2023-04-03)
-
 
 ### Features
 
-* added support for passthru env variable ([f7e902b](https://github.com/skyslit/ark/commit/f7e902b61eae6c1e364aa6c3df6e0195b05107b0))
-
-
-
-
+- added support for passthru env variable ([f7e902b](https://github.com/skyslit/ark/commit/f7e902b61eae6c1e364aa6c3df6e0195b05107b0))
 
 ## 2.31.7 (2023-03-16)
 
-
 ### Bug Fixes
 
-* issue with versioning ([25fb61e](https://github.com/skyslit/ark-2/commit/25fb61e49aefba97f8ce8a16ce09d0f2228ae5d1))
-
-
-
-
+- issue with versioning ([25fb61e](https://github.com/skyslit/ark-2/commit/25fb61e49aefba97f8ce8a16ce09d0f2228ae5d1))
 
 ## [2.31.2](https://github.com/skyslit/ark/compare/v2.31.1...v2.31.2) (2023-02-03)
 
-
 ### Bug Fixes
 
-* polished realtime server ([8fa686e](https://github.com/skyslit/ark/commit/8fa686ee6cc2d57ec3ec8dea4ccd0d001c9ff656))
-
-
-
-
+- polished realtime server ([8fa686e](https://github.com/skyslit/ark/commit/8fa686ee6cc2d57ec3ec8dea4ccd0d001c9ff656))
 
 ## [2.31.1](https://github.com/skyslit/ark/compare/v2.31.0...v2.31.1) (2023-02-02)
 
-
 ### Bug Fixes
 
-* decodeURIComponent fix done ([564d3d5](https://github.com/skyslit/ark/commit/564d3d55b3bc8d2d2b1550cb56b065f0e33b5456))
-
-
-
-
+- decodeURIComponent fix done ([564d3d5](https://github.com/skyslit/ark/commit/564d3d55b3bc8d2d2b1550cb56b065f0e33b5456))
 
 # [2.31.0](https://github.com/skyslit/ark/compare/v2.30.0...v2.31.0) (2023-02-02)
 
-
 ### Features
 
-* added realtime in frontend ([82b3853](https://github.com/skyslit/ark/commit/82b38537c5788749bd706f73298d36c4a7c734d4))
-* added redirect uri support when authenticating ([355198b](https://github.com/skyslit/ark/commit/355198b866e5c9e07691ea9ea624264bd9b8c6c6))
-
-
-
-
+- added realtime in frontend ([82b3853](https://github.com/skyslit/ark/commit/82b38537c5788749bd706f73298d36c4a7c734d4))
+- added redirect uri support when authenticating ([355198b](https://github.com/skyslit/ark/commit/355198b866e5c9e07691ea9ea624264bd9b8c6c6))
 
 ## [2.29.1](https://github.com/skyslit/ark/compare/v2.29.0...v2.29.1) (2022-10-12)
 
-
 ### Bug Fixes
 
-* issue with dynamics rendering multiple times ([5b52255](https://github.com/skyslit/ark/commit/5b5225571aa83a410d4843dce1e045f0f098fc58))
-
-
-
-
+- issue with dynamics rendering multiple times ([5b52255](https://github.com/skyslit/ark/commit/5b5225571aa83a410d4843dce1e045f0f098fc58))
 
 # [2.29.0](https://github.com/skyslit/ark/compare/v2.28.1...v2.29.0) (2022-10-01)
 
-
 ### Bug Fixes
 
-* issue with test renderer ([da7d741](https://github.com/skyslit/ark/commit/da7d7417cc6ff37f222eac49426ebe81e0731a46))
-
+- issue with test renderer ([da7d741](https://github.com/skyslit/ark/commit/da7d7417cc6ff37f222eac49426ebe81e0731a46))
 
 ### Features
 
-* added support for static template in dynamics ([02467c8](https://github.com/skyslit/ark/commit/02467c8ebfd99a37164c6e0112d9fcd39b29eed3))
-
-
-
-
+- added support for static template in dynamics ([02467c8](https://github.com/skyslit/ark/commit/02467c8ebfd99a37164c6e0112d9fcd39b29eed3))
 
 ## [2.28.1](https://github.com/skyslit/ark/compare/v2.28.0...v2.28.1) (2022-09-28)
 
 **Note:** Version bump only for package @skyslit/ark-frontend
 
-
-
-
-
 # [2.28.0](https://github.com/skyslit/ark/compare/v2.27.0...v2.28.0) (2022-09-24)
-
 
 ### Features
 
-* added external auth server ([087348d](https://github.com/skyslit/ark/commit/087348d0734e1f1c7c31bdfa283bbd1eb47aa62d))
-* added ux delay ([e322348](https://github.com/skyslit/ark/commit/e322348bbcc3f36c61944ac0a8db12cdfcde6b8a))
-
-
-
-
+- added external auth server ([087348d](https://github.com/skyslit/ark/commit/087348d0734e1f1c7c31bdfa283bbd1eb47aa62d))
+- added ux delay ([e322348](https://github.com/skyslit/ark/commit/e322348bbcc3f36c61944ac0a8db12cdfcde6b8a))
 
 # [2.27.0](https://github.com/skyslit/ark/compare/v2.26.0...v2.27.0) (2022-06-27)
 
-
 ### Features
 
-* added react context based hook useArkReactServices ([6df077a](https://github.com/skyslit/ark/commit/6df077a172ec9b5ee47f2e0d2ff1032883263bc5))
-
-
-
-
+- added react context based hook useArkReactServices ([6df077a](https://github.com/skyslit/ark/commit/6df077a172ec9b5ee47f2e0d2ff1032883263bc5))
 
 # [2.25.0](https://github.com/skyslit/ark/compare/v2.24.0...v2.25.0) (2022-05-29)
 
 **Note:** Version bump only for package @skyslit/ark-frontend
 
-
-
-
-
 # [2.24.0](https://github.com/skyslit/ark/compare/v2.23.4...v2.24.0) (2022-05-27)
 
 **Note:** Version bump only for package @skyslit/ark-frontend
 
-
-
-
-
 ## [2.23.4](https://github.com/skyslit/ark/compare/v2.23.3...v2.23.4) (2022-05-26)
-
 
 ### Bug Fixes
 
-* security vulnerabilities in deps ([2c451a8](https://github.com/skyslit/ark/commit/2c451a8e06b56fe59e635c97ca516e45f75d2199))
-
-
-
-
+- security vulnerabilities in deps ([2c451a8](https://github.com/skyslit/ark/commit/2c451a8e06b56fe59e635c97ca516e45f75d2199))
 
 ## [2.23.2](https://github.com/skyslit/ark/compare/v2.23.1...v2.23.2) (2022-01-09)
 
-
 ### Bug Fixes
 
-* issue with types ([c2a042d](https://github.com/skyslit/ark/commit/c2a042d4f7f8ec32b4d3f9a91e26dd2a2292532d))
-
-
-
-
+- issue with types ([c2a042d](https://github.com/skyslit/ark/commit/c2a042d4f7f8ec32b4d3f9a91e26dd2a2292532d))
 
 ## [2.23.1](https://github.com/skyslit/ark/compare/v2.23.0...v2.23.1) (2022-01-09)
 
 **Note:** Version bump only for package @skyslit/ark-frontend
 
-
-
-
-
 # [2.23.0](https://github.com/skyslit/ark/compare/v2.22.0...v2.23.0) (2022-01-08)
 
 **Note:** Version bump only for package @skyslit/ark-frontend
 
-
-
-
-
 # [2.22.0](https://github.com/skyslit/ark/compare/v2.21.7...v2.22.0) (2022-01-07)
-
 
 ### Features
 
-* replaced cms func with helpers from core ([47bdafd](https://github.com/skyslit/ark/commit/47bdafd38692d45bf5de4ecaee4578bf7d50995a))
-
-
-
-
+- replaced cms func with helpers from core ([47bdafd](https://github.com/skyslit/ark/commit/47bdafd38692d45bf5de4ecaee4578bf7d50995a))
 
 ## [2.21.7](https://github.com/skyslit/ark/compare/v2.21.2...v2.21.7) (2021-11-20)
 
-
 ### Bug Fixes
 
-* issue with json body parser limit ([8e2f81d](https://github.com/skyslit/ark/commit/8e2f81dfcfd47668a440e0b015a8e31456ccc848))
-
-
-
-
+- issue with json body parser limit ([8e2f81d](https://github.com/skyslit/ark/commit/8e2f81dfcfd47668a440e0b015a8e31456ccc848))
 
 ## [2.21.6](https://github.com/skyslit/ark/compare/v2.21.2...v2.21.6) (2021-11-20)
 

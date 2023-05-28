@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.38.1](https://github.com/skyslit/ark/compare/v2.38.0...v2.38.1) (2023-05-28)
+
+
+### Bug Fixes
+
+* conflicts resolved ([366f213](https://github.com/skyslit/ark/commit/366f21383332a6a934822120f5fc0f92e2e014ba))
+* removed node-pty ([287ae96](https://github.com/skyslit/ark/commit/287ae96d1274a83f01fb50cd14658fb20cfc5205))
+
+
+
+
+
 # [2.38.0](https://github.com/skyslit/ark/compare/v2.37.2...v2.38.0) (2023-05-28)
 
 **Note:** Version bump only for package @skyslit/ark

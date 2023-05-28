@@ -7,280 +7,143 @@ See [Conventional Commits](https://conventionalcommits.org) for commit guideline
 
 **Note:** Version bump only for package @skyslit/ark-devtools
 
-
-
-
-
 # [2.36.0](https://github.com/skyslit/ark/compare/v2.35.0...v2.36.0) (2023-05-25)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
-
-
-
-
 
 # [2.35.0](https://github.com/skyslit/ark/compare/v2.34.0...v2.35.0) (2023-05-24)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
 
-
-
-
-
 # [2.34.0](https://github.com/skyslit/ark/compare/v2.33.0...v2.34.0) (2023-05-22)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
-
-
-
-
 
 # [2.33.0](https://github.com/skyslit/ark/compare/v2.32.3...v2.33.0) (2023-05-21)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
 
-
-
-
-
 ## [2.32.2](https://github.com/skyslit/ark/compare/v2.32.1...v2.32.2) (2023-04-10)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
-
-
-
-
 
 ## [2.32.1](https://github.com/skyslit/ark/compare/v2.32.0...v2.32.1) (2023-04-03)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
 
-
-
-
-
 # [2.32.0](https://github.com/skyslit/ark/compare/v2.31.7...v2.32.0) (2023-04-03)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
 
-
-
-
-
 ## 2.31.7 (2023-03-16)
-
 
 ### Bug Fixes
 
-* issue with versioning ([25fb61e](https://github.com/skyslit/ark-2/commit/25fb61e49aefba97f8ce8a16ce09d0f2228ae5d1))
-
-
-
-
+- issue with versioning ([25fb61e](https://github.com/skyslit/ark-2/commit/25fb61e49aefba97f8ce8a16ce09d0f2228ae5d1))
 
 ## [2.31.5](https://github.com/skyslit/ark/compare/v2.31.4...v2.31.5) (2023-02-25)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
 
-
-
-
-
 ## [2.31.4](https://github.com/skyslit/ark/compare/v2.31.3...v2.31.4) (2023-02-24)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
-
-
-
-
 
 ## [2.31.3](https://github.com/skyslit/ark/compare/v2.31.2...v2.31.3) (2023-02-23)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
 
-
-
-
-
 ## [2.31.2](https://github.com/skyslit/ark/compare/v2.31.1...v2.31.2) (2023-02-03)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
-
-
-
-
 
 ## [2.31.1](https://github.com/skyslit/ark/compare/v2.31.0...v2.31.1) (2023-02-02)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
 
-
-
-
-
 # [2.31.0](https://github.com/skyslit/ark/compare/v2.30.0...v2.31.0) (2023-02-02)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
-
-
-
-
 
 # [2.30.0](https://github.com/skyslit/ark/compare/v2.29.5...v2.30.0) (2022-12-27)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
 
-
-
-
-
 ## [2.29.5](https://github.com/skyslit/ark/compare/v2.29.4...v2.29.5) (2022-12-15)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
 
-
-
-
-
 ## [2.29.4](https://github.com/skyslit/ark/compare/v2.29.3...v2.29.4) (2022-12-11)
-
 
 ### Bug Fixes
 
-* issue with query building + added ttf font file support ([2d5f088](https://github.com/skyslit/ark/commit/2d5f088a425311aae376d9927f138773a8fe99b1))
-
-
-
-
+- issue with query building + added ttf font file support ([2d5f088](https://github.com/skyslit/ark/commit/2d5f088a425311aae376d9927f138773a8fe99b1))
 
 ## [2.29.2](https://github.com/skyslit/ark/compare/v2.29.1...v2.29.2) (2022-10-24)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
 
-
-
-
-
 ## [2.29.1](https://github.com/skyslit/ark/compare/v2.29.0...v2.29.1) (2022-10-12)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
-
-
-
-
 
 # [2.29.0](https://github.com/skyslit/ark/compare/v2.28.1...v2.29.0) (2022-10-01)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
 
-
-
-
-
 ## [2.28.1](https://github.com/skyslit/ark/compare/v2.28.0...v2.28.1) (2022-09-28)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
 
-
-
-
-
 # [2.28.0](https://github.com/skyslit/ark/compare/v2.27.0...v2.28.0) (2022-09-24)
-
 
 ### Features
 
-* added ux delay ([e322348](https://github.com/skyslit/ark/commit/e322348bbcc3f36c61944ac0a8db12cdfcde6b8a))
-
-
-
-
+- added ux delay ([e322348](https://github.com/skyslit/ark/commit/e322348bbcc3f36c61944ac0a8db12cdfcde6b8a))
 
 # [2.27.0](https://github.com/skyslit/ark/compare/v2.26.0...v2.27.0) (2022-06-27)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
 
-
-
-
-
 # [2.26.0](https://github.com/skyslit/ark/compare/v2.25.0...v2.26.0) (2022-05-30)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
-
-
-
-
 
 # [2.25.0](https://github.com/skyslit/ark/compare/v2.24.0...v2.25.0) (2022-05-29)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
 
-
-
-
-
 # [2.24.0](https://github.com/skyslit/ark/compare/v2.23.4...v2.24.0) (2022-05-27)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
 
-
-
-
-
 ## [2.23.4](https://github.com/skyslit/ark/compare/v2.23.3...v2.23.4) (2022-05-26)
-
 
 ### Bug Fixes
 
-* vulnerabilities reduced in dev-tools ([539bce8](https://github.com/skyslit/ark/commit/539bce80121d767b31a1a0be29d5dafbf692fc6a))
-
-
-
-
+- vulnerabilities reduced in dev-tools ([539bce8](https://github.com/skyslit/ark/commit/539bce80121d767b31a1a0be29d5dafbf692fc6a))
 
 ## [2.23.2](https://github.com/skyslit/ark/compare/v2.23.1...v2.23.2) (2022-01-09)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
 
-
-
-
-
 ## [2.23.1](https://github.com/skyslit/ark/compare/v2.23.0...v2.23.1) (2022-01-09)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
-
-
-
-
 
 # [2.23.0](https://github.com/skyslit/ark/compare/v2.22.0...v2.23.0) (2022-01-08)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
 
-
-
-
-
 # [2.22.0](https://github.com/skyslit/ark/compare/v2.21.7...v2.22.0) (2022-01-07)
 
 **Note:** Version bump only for package @skyslit/ark-devtools
 
-
-
-
-
 ## [2.21.7](https://github.com/skyslit/ark/compare/v2.21.2...v2.21.7) (2021-11-20)
-
 
 ### Bug Fixes
 
-* issue with json body parser limit ([8e2f81d](https://github.com/skyslit/ark/commit/8e2f81dfcfd47668a440e0b015a8e31456ccc848))
-
-
-
-
+- issue with json body parser limit ([8e2f81d](https://github.com/skyslit/ark/commit/8e2f81dfcfd47668a440e0b015a8e31456ccc848))
 
 ## [2.21.6](https://github.com/skyslit/ark/compare/v2.21.2...v2.21.6) (2021-11-20)
 

@@ -35,7 +35,7 @@ function printHelp() {
       },
       {
         header: 'Usage',
-        content: '$ fpz dev-env <command> <options>',
+        content: '$ ark dev-env <command> <options>',
       },
       {
         header: 'Command List',

@@ -33,7 +33,7 @@ export default (argv?: string[]) => {
           },
           {
             header: 'Sample Usage',
-            content: '$ fpz setup-devops <provider-name>',
+            content: '$ ark setup-devops <provider-name>',
           },
         ])
       )
@@ -51,7 +51,7 @@ export default (argv?: string[]) => {
         },
         {
           header: 'Usage',
-          content: '$ fpz setup-devops <provider-name>',
+          content: '$ ark setup-devops <provider-name>',
         },
         {
           header: 'Options List',

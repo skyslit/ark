@@ -33,7 +33,7 @@ export default (argv?: string[]) => {
           },
           {
             header: 'Sample Usage',
-            content: '$ fpz add <package-name>',
+            content: '$ ark add <package-name>',
           },
         ])
       )
@@ -50,7 +50,7 @@ export default (argv?: string[]) => {
         },
         {
           header: 'Usage',
-          content: '$ fpz add <package-name>',
+          content: '$ ark add <package-name>',
         },
         {
           header: 'Options List',

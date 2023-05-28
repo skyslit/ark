@@ -27,7 +27,7 @@ test(
       ['@skyslit/ark-core']: '^2.1.0',
       ['@skyslit/ark-backend']: '^2.1.0',
       ['@skyslit/ark-frontend']: '^2.1.0',
-      ['fpz']: '^2.1.0',
+      ['@skyslit/ark']: '^2.37.2',
     };
 
     // @ts-ignore
@@ -55,7 +55,7 @@ test(
         packageJsonFile.dependencies['@skyslit/ark-core'] = '2.1.0';
         packageJsonFile.dependencies['@skyslit/ark-backend'] = '2.1.0';
         packageJsonFile.dependencies['@skyslit/ark-frontend'] = '2.1.0';
-        packageJsonFile.dependencies['fpz'] = '2.1.0';
+        packageJsonFile.dependencies['@skyslit/ark'] = '2.37.2';
 
         fs.writeFileSync(
           path.join(testDir, 'package.json'),
@@ -77,7 +77,8 @@ test(
           referenceList['@skyslit/ark-backend'];
         packageJsonFile.dependencies['@skyslit/ark-frontend'] =
           referenceList['@skyslit/ark-frontend'];
-        packageJsonFile.dependencies['fpz'] = referenceList['fpz'];
+        packageJsonFile.dependencies['@skyslit/ark'] =
+          referenceList['@skyslit/ark'];
 
         fs.writeFileSync(
           path.join(testDir, 'package.json'),
@@ -105,8 +106,8 @@ test(
         expect(
           packageJsonFile.dependencies['@skyslit/ark-frontend']
         ).not.toStrictEqual(referenceList['@skyslit/ark-frontend']);
-        expect(packageJsonFile.dependencies['fpz']).not.toStrictEqual(
-          referenceList['fpz']
+        expect(packageJsonFile.dependencies['@skyslit/ark']).not.toStrictEqual(
+          referenceList['@skyslit/ark']
         );
 
         done();

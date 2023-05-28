@@ -24,11 +24,11 @@ export default (argv?: string[]) => {
         {
           header: 'Initialize Project',
           content:
-            'Scaffolds a template suitable for building enterprise grade business application or re-usable FPZ module',
+            'Scaffolds a template suitable for building enterprise grade business application',
         },
         {
           header: 'Usage',
-          content: '$ fpz init <option>',
+          content: '$ ark init <option>',
         },
         {
           header: 'Options List',
@@ -42,7 +42,7 @@ export default (argv?: string[]) => {
         {
           header: 'Create Project',
           content:
-            'Scaffolds a template suitable for building enterprise grade business application or re-usable FPZ module',
+            'Scaffolds a template suitable for building enterprise grade business application',
         },
       ])
     );

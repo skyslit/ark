@@ -42,13 +42,6 @@ export default (cwd_?: string) => {
         ),
     },
     {
-      title: 'upgrade fpz',
-      task: () =>
-        runCommand('upgrading...', `${packager} update fpz; exit`, {
-          cwd: cwd,
-        }),
-    },
-    {
       title: 'upgrade @skyslit/ark',
       task: () =>
         runCommand('upgrading...', `${packager} update @skyslit/ark; exit`, {

@@ -1,7 +1,7 @@
 import traverse from '../traverse';
 
 export type Activator = () => any | Promise<any>;
-export type ContextScope<T> = (props: Partial<Ark.Pointers>) => T | Promise<T>;
+export type ContextScope<T> = (props: Ark.Pointers) => T | Promise<T>;
 
 export type Capabilities = {
   serviceId: string;
@@ -23,14 +23,14 @@ export type ServiceResponse<M, D> = {
 };
 
 interface PointerBase {
-  init: () => void | Promise<any>;
+  init?: () => void | Promise<any>;
 }
 
 export type PointerCreator<T> = (
   id: string,
   controller: ControllerContext<any>,
   context: ApplicationContext
-) => T & Partial<PointerBase>;
+) => T & PointerBase;
 
 export type PointerExtender<O, N> = (original: Partial<O>) => PointerCreator<N>;
 

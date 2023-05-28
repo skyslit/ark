@@ -56,7 +56,7 @@ import {
   RedisScripts,
 } from 'redis';
 import { createAdapter } from '@socket.io/redis-adapter';
-import { createDynamicsV2Services } from './dynamics-v2';
+import { FolderOperationsApi, createDynamicsV2Services } from './dynamics-v2';
 
 type HttpVerbs =
   | 'all'
@@ -233,6 +233,7 @@ declare global {
         connectionString: string,
         opts?: ConnectionOptions
       ) => void;
+      useFolderOperations: () => FolderOperationsApi;
       useModel: <T>(
         name: string,
         schema?: SchemaDefinition<any> | (() => Schema),
@@ -617,7 +618,7 @@ export function getModelName(moduleId: string, modelName: string): string {
   return `${moduleId}_${modelName}`;
 }
 
-export const Data = createPointer<Partial<Ark.Data>>(
+export const Data = createPointer<Ark.Data>(
   (moduleId, controller, context) => ({
     useVolumeAccessPoint: (refId, vol, opts) => {
       controller.ensureInitializing(
@@ -708,6 +709,21 @@ export const Data = createPointer<Partial<Ark.Data>>(
             });
           })
       );
+    },
+    useFolderOperations: () => {
+      const folderOp: FolderOperationsApi = context.getData(
+        moduleId,
+        `dynamics://folder-op-api`,
+        null
+      );
+
+      if (!folderOp) {
+        throw new Error(
+          "Looks like you're trying to useFolderOperations without enabling dynamics server."
+        );
+      }
+
+      return folderOp;
     },
     useModel: <T extends unknown>(
       refId: string,
@@ -1462,7 +1478,7 @@ async function getRemoteConfig(
   return config;
 }
 
-export const Backend = createPointer<Partial<Ark.Backend>>(
+export const Backend = createPointer<Ark.Backend>(
   (moduleId, controller, context) => ({
     init: () => {
       if (!context.existData('default', 'express')) {

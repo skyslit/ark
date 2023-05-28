@@ -9,8 +9,82 @@ import Joi from 'joi';
 import path from 'path';
 import {
   IDynamicsPermissionDataStore,
+  PermissionResult,
   getItemPermission,
 } from './utils/get-item-permission';
+
+type Item = {
+  name: string;
+  parentPath: string;
+  path: string;
+  type: string;
+  resolved: boolean;
+  meta: any;
+  security: ItemSecurity;
+  slug: string;
+  isSymLink: boolean;
+  destinationPath: string;
+};
+
+type ItemSecurity = {
+  permissions: [];
+};
+
+export type FolderOperationsApi = {
+  fetchContent: (
+    namespace: string,
+    path: string
+  ) => Promise<{ currentDir: Item; items: Item[] }>;
+  addItem: (
+    namespace: string,
+    parentPath: string,
+    name: string,
+    type: string,
+    meta: any,
+    security?: any,
+    isSymLink?: boolean,
+    destinationPath?: string
+  ) => Promise<Item>;
+  renameItem: (
+    namespace: string,
+    _path: string,
+    newParentPath: string,
+    newName: string
+  ) => Promise<{
+    newPath: string;
+    newSlug: string;
+    updatedItem: Item;
+  }>;
+  deleteOneItem: (
+    namespace: string,
+    path: string
+  ) => Promise<{
+    path: string;
+  }>;
+  createShortcut: (
+    namespace: string,
+    sourcePath: string,
+    destinationPath: string,
+    itemName: string
+  ) => Promise<Item>;
+  updateItemMeta: (namespace: string, path: string, meta: any) => Promise<any>;
+  updateItemSecurity: (
+    namespace: string,
+    path: string,
+    security: any
+  ) => Promise<any>;
+  readFile: (namespace: string, filePath: string) => Promise<any>;
+  writeFile: (
+    namespace: string,
+    filePath: string,
+    content: any
+  ) => Promise<any>;
+  getItemPermission: (
+    ns: string,
+    path: string,
+    user: { emailAddress?: string; policies?: string[] }
+  ) => Promise<PermissionResult>;
+};
 
 export function createDynamicsV2Services(
   context: ApplicationContext,
@@ -120,6 +194,82 @@ export function createDynamicsV2Services(
 
     const getFullFileCollectionName = (ns: string, collName: string) => {
       return `dyn_${ns}_${collName}`;
+    };
+
+    const fetchContent = async (namespace: string, path: string) => {
+      const res = {
+        currentDir: null,
+        items: [],
+      };
+
+      if (path === '/') {
+        res.currentDir = {
+          name: 'home',
+          path: '/',
+          parentPath: null,
+          type: 'root',
+          resolved: true,
+          meta: {},
+        };
+      } else {
+        res.currentDir = await PowerWidgetNavItems.findOne({
+          namespace,
+          path,
+        });
+      }
+
+      res.items = await PowerWidgetNavItems.find({
+        namespace,
+        parentPath: path,
+      });
+
+      return res;
+    };
+
+    const addItem = async (
+      namespace: string,
+      parentPath: string,
+      name: string,
+      type: string,
+      meta: any,
+      security: ItemSecurity = { permissions: [] },
+      isSymLink: boolean = false,
+      destinationPath: string = null
+    ) => {
+      const slug = encodeURIComponent(
+        String(name)
+          .replace(/\W+(?!$)/g, '-')
+          .toLowerCase()
+          .replace(/\W$/, '')
+      );
+      const exists = await PowerWidgetNavItems.findOne({
+        namespace,
+        parentPath,
+        slug,
+      });
+
+      if (Boolean(exists)) {
+        throw new Error(
+          `slug ${slug} already exists in parent path ${parentPath}`
+        );
+      }
+
+      const item = new PowerWidgetNavItems({
+        namespace,
+        parentPath,
+        name,
+        type,
+        meta,
+        security,
+        slug,
+        isSymLink,
+        destinationPath,
+        path: path.posix.join(parentPath, slug),
+      });
+
+      await item.save();
+
+      return item.toObject() as any;
     };
 
     const renameItem = async (
@@ -237,50 +387,6 @@ export function createDynamicsV2Services(
       };
     };
 
-    const addItem = async (
-      namespace: string,
-      parentPath: string,
-      name: string,
-      type: string,
-      meta: any,
-      isSymLink: boolean = false,
-      destinationPath: string = null
-    ) => {
-      const slug = encodeURIComponent(
-        String(name)
-          .replace(/\W+(?!$)/g, '-')
-          .toLowerCase()
-          .replace(/\W$/, '')
-      );
-      const exists = await PowerWidgetNavItems.findOne({
-        namespace,
-        parentPath,
-        slug,
-      });
-
-      if (Boolean(exists)) {
-        throw new Error(
-          `slug ${slug} already exists in parent path ${parentPath}`
-        );
-      }
-
-      const item = new PowerWidgetNavItems({
-        namespace,
-        parentPath,
-        name,
-        type,
-        meta,
-        slug,
-        isSymLink,
-        destinationPath,
-        path: path.posix.join(parentPath, slug),
-      });
-
-      await item.save();
-
-      return item;
-    };
-
     const createShortcut = async (
       namespace: string,
       sourcePath: string,
@@ -303,6 +409,7 @@ export function createDynamicsV2Services(
         itemName,
         sourceItem.type,
         sourceItem.meta,
+        undefined,
         true,
         sourceItem.path
       );
@@ -448,6 +555,26 @@ export function createDynamicsV2Services(
       return writeOp;
     };
 
+    const folderOpApi: FolderOperationsApi = {
+      fetchContent,
+      addItem,
+      renameItem,
+      deleteOneItem: deleteOnePath,
+      createShortcut,
+      updateItemMeta,
+      updateItemSecurity,
+      readFile,
+      writeFile,
+      getItemPermission: (ns, path, user) =>
+        getItemPermission(ns, path, user, permissionDataServer),
+    };
+
+    context.setData<FolderOperationsApi>(
+      moduleId,
+      'dynamics://folder-op-api',
+      folderOpApi
+    );
+
     /** Fetch content */
     useService(
       defineService('powerserver___fetch-content', (opts) => {
@@ -478,26 +605,11 @@ export function createDynamicsV2Services(
             claims: permissionResult.claims,
           };
 
-          if (path === '/') {
-            res.currentDir = {
-              name: 'home',
-              path: '/',
-              parentPath: null,
-              type: 'root',
-              resolved: true,
-              meta: {},
-            };
-          } else {
-            res.currentDir = await PowerWidgetNavItems.findOne({
-              namespace,
-              path,
-            });
+          const fetchResponse = await fetchContent(namespace, path);
+          if (fetchResponse) {
+            res.currentDir = fetchResponse.currentDir;
+            res.items = fetchResponse.items;
           }
-
-          res.items = await PowerWidgetNavItems.find({
-            namespace,
-            parentPath: path,
-          });
 
           return opts.success(res);
         });

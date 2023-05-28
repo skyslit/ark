@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.38.0](https://github.com/skyslit/ark/compare/v2.37.2...v2.38.0) (2023-05-28)
+
+
+### Features
+
+* added folder operations api in the backend ([2678d44](https://github.com/skyslit/ark/commit/2678d44626e4d9c214295d68ade1da1523000075))
+* added permission evaluator in folder api ([1acc56a](https://github.com/skyslit/ark/commit/1acc56a48d276cf2d6ae018edfb9e35051b1249c))
+
+
+
+
+
 ## [2.37.2](https://github.com/skyslit/ark/compare/v2.37.1...v2.37.2) (2023-05-27)
 
 

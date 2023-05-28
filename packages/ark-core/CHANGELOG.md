@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.38.0](https://github.com/skyslit/ark/compare/v2.37.2...v2.38.0) (2023-05-28)
+
+
+### Features
+
+* added folder operations api in the backend ([2678d44](https://github.com/skyslit/ark/commit/2678d44626e4d9c214295d68ade1da1523000075))
+
+
+
+
+
 ## 2.31.7 (2023-03-16)
 
 

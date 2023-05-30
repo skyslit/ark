@@ -18,9 +18,6 @@
       "url": "http://www.apache.org/licenses/LICENSE-2.0"
     }
   ],
-  "bin": {
-    "ark": "build/index.js"
-  },
   "devDependencies": {
     "@testing-library/react-hooks": "^3.7.0",
     "@types/command-line-args": "^5.0.0",

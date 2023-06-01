@@ -10,6 +10,9 @@
     "build": "../../node_modules/.bin/tsc",
     "launch": "node ./build/index.js"
   },
+  "bin": {
+    "ark": "build/index.js"
+  },
   "author": "Skyslit Network Private Limited",
   "license": "Apache-2.0",
   "licenses": [

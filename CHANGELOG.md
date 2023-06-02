@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.38.4](https://github.com/skyslit/ark/compare/v2.38.3...v2.38.4) (2023-06-02)
+
+
+### Bug Fixes
+
+* brought back bin ([cd9d45c](https://github.com/skyslit/ark/commit/cd9d45ca6a909bc48f6ef862971c5a9f437491d4))
+
+
+
+
+
 ## [2.38.3](https://github.com/skyslit/ark/compare/v2.38.2...v2.38.3) (2023-05-30)
 
 

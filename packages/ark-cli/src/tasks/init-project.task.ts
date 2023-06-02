@@ -292,6 +292,7 @@ export default (cwd_?: string) => {
           fs.createReadStream(tarFilePath)
             .pipe(gunzip())
             .pipe(tar.extract(tarExtractFilePath, {}))
+            .on('error', reject)
             .on('finish', () => {
               resolve();
             });

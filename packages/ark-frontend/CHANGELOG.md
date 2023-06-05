@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.38.5](https://github.com/skyslit/ark/compare/v2.38.4...v2.38.5) (2023-06-05)
+
+
+### Bug Fixes
+
+* issue with useFolder() fn ([0664ccf](https://github.com/skyslit/ark/commit/0664ccf725bae56e84d8cd386a50a6bc57436210))
+
+
+
+
+
 # [2.38.0](https://github.com/skyslit/ark/compare/v2.37.2...v2.38.0) (2023-05-28)
 
 **Note:** Version bump only for package @skyslit/ark-frontend

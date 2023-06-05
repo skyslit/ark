@@ -8,7 +8,12 @@ import controller, {
   CustomType,
 } from '../../core/controller';
 import { match } from 'path-to-regexp';
-import { ContentHook, Frontend, useArkReactServices } from '../../..';
+import {
+  ContentHook,
+  Frontend,
+  useArkReactServices,
+  useStoreCreator,
+} from '../../..';
 import { compile, createSchema } from '../../utils/schema';
 import { joinPath } from '../../utils/path';
 
@@ -399,6 +404,77 @@ function createCatalogue(props: PropType): CatalogueApi {
   };
 }
 
+export type FolderIntegrationApi = {
+  useCataloguePath: (
+    id: string,
+    path: string,
+    autoFetch?: boolean,
+    useRedux?: boolean,
+    ns?: string
+  ) => CatalogueService;
+};
+
+export function createFolderApis(
+  moduleId: string,
+  ark_controller: any,
+  context: any
+): () => FolderIntegrationApi {
+  const useStore = useStoreCreator(moduleId, context);
+  return () => {
+    return {
+      useCataloguePath(
+        id,
+        path,
+        autoFetch = true,
+        useRedux = false,
+        ns = 'default'
+      ) {
+        const { use } = useArkReactServices();
+        const { useStore } = use(Frontend);
+        const [loaded, setLoaded] = useStore<boolean>(
+          `use-catalogue-path-${id}-loaded`,
+          false,
+          useRedux === false
+        );
+        const [response, setResponse] = useStore<Response>(
+          id,
+          null,
+          useRedux === false
+        );
+
+        React.useEffect(() => {
+          if (autoFetch === true) {
+            refresh();
+          }
+        }, [ns, path]);
+
+        const refresh = React.useCallback(
+          async (force = false) => {
+            if (loaded === true && force === false) {
+              return;
+            }
+
+            setLoaded(false);
+            setResponse(null);
+
+            return controller.fetch(ns, path).then((res) => {
+              setResponse(res);
+              setLoaded(true);
+            });
+          },
+          [ns, path, loaded]
+        );
+
+        return {
+          loaded,
+          response,
+          refresh,
+        };
+      },
+    };
+  };
+}
+
 export function useCatalogue(): CatalogueApi {
   return React.useContext(CatalogueContext);
 }
@@ -416,7 +492,10 @@ export function useCataloguePath(
   autoFetch: boolean = true,
   useRedux: boolean = false
 ): CatalogueService {
+  const ark = useArkReactServices();
+  console.log('int>ark', ark);
   const { use } = useArkReactServices();
+  console.log('use', use);
   const { useStore } = use(Frontend);
   const [loaded, setLoaded] = useStore<boolean>(
     `use-catalogue-path-${id}-loaded`,

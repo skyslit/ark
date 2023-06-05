@@ -30,6 +30,10 @@ import cloneDeep from 'lodash/cloneDeep';
 import isEqual from 'lodash/isEqual';
 import _Dynamics, { DynamicsController } from './dynamics';
 import { io, ManagerOptions, SocketOptions, Socket } from 'socket.io-client';
+import {
+  createFolderApis,
+  FolderIntegrationApi,
+} from './dynamics-v2/widgets/catalogue';
 
 export type RenderMode = 'ssr' | 'csr';
 
@@ -241,6 +245,7 @@ declare global {
           refId: string,
           controller?: DynamicsController
         ) => DynamicsController;
+        useFolder: () => FolderIntegrationApi;
       }
     }
   }
@@ -473,30 +478,24 @@ export function useArkReactServices(): ComponentPropType {
  * @return {React.FunctionComponent} Returns connected react component
  */
 export function arkToReactComponent(
-  creator: ArkReactComponent<any>,
+  Creator: ArkReactComponent<any>,
   refId: string,
   moduleId: string,
   controller: ControllerContext<any>,
   context: ApplicationContext
 ): React.FunctionComponent<any> {
-  if (!creator) {
+  if (!Creator) {
     throw new Error('creator is required');
   }
   const ref = extractRef(refId, moduleId);
+  const value = {
+    currentModuleId: ref.moduleName,
+    use: context.getPointers(ref.moduleName, controller).use,
+  };
+
   return (props: any) => (
-    <ArkReactComponentContext.Provider
-      value={{
-        currentModuleId: ref.moduleName,
-        use: context.getPointers(ref.moduleName, controller).use,
-      }}
-    >
-      {creator({
-        ...props,
-        ...{
-          use: context.getPointers(ref.moduleName, controller).use,
-          currentModuleId: ref.moduleName,
-        },
-      })}
+    <ArkReactComponentContext.Provider value={value}>
+      <Creator {...props} {...value} />
     </ArkReactComponentContext.Provider>
   );
 }
@@ -581,7 +580,7 @@ export function reduxServiceStateSnapshot(
   };
 }
 
-const useStoreCreator: (
+export const useStoreCreator: (
   moduleId: string,
   ctx: ApplicationContext
 ) => StoreHook = (moduleId, ctx) => (
@@ -1825,6 +1824,7 @@ export const Frontend = createPointer<Ark.MERN.React>(
         'dynamics.controller'
       );
     },
+    useFolder: createFolderApis(moduleId, controller, context),
   })
 );
 

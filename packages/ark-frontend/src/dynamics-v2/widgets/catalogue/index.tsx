@@ -8,12 +8,7 @@ import controller, {
   CustomType,
 } from '../../core/controller';
 import { match } from 'path-to-regexp';
-import {
-  ContentHook,
-  Frontend,
-  useArkReactServices,
-  useStoreCreator,
-} from '../../..';
+import { ContentHook, Frontend, useArkReactServices } from '../../..';
 import { compile, createSchema } from '../../utils/schema';
 import { joinPath } from '../../utils/path';
 
@@ -408,10 +403,14 @@ export type FolderIntegrationApi = {
   useCataloguePath: (
     id: string,
     path: string,
-    autoFetch?: boolean,
-    useRedux?: boolean,
-    ns?: string
+    opts?: {
+      autoFetch?: boolean;
+      useRedux?: boolean;
+      ns?: string;
+      depth?: number;
+    }
   ) => CatalogueService;
+  createItem: () => Promise<any>;
 };
 
 export function createFolderApis(
@@ -419,16 +418,21 @@ export function createFolderApis(
   ark_controller: any,
   context: any
 ): () => FolderIntegrationApi {
-  const useStore = useStoreCreator(moduleId, context);
   return () => {
     return {
-      useCataloguePath(
-        id,
-        path,
-        autoFetch = true,
-        useRedux = false,
-        ns = 'default'
-      ) {
+      createItem: async () => {},
+      useCataloguePath(id, path, opts) {
+        const { autoFetch, useRedux, ns, depth } = React.useMemo(() => {
+          const def = {
+            autoFetch: true,
+            useRedux: false,
+            ns: 'default',
+            depth: 0,
+          };
+
+          return Object.assign({}, def, opts || {});
+        }, [opts]);
+
         const { use } = useArkReactServices();
         const { useStore } = use(Frontend);
         const [loaded, setLoaded] = useStore<boolean>(
@@ -457,12 +461,12 @@ export function createFolderApis(
             setLoaded(false);
             setResponse(null);
 
-            return controller.fetch(ns, path).then((res) => {
+            return controller.fetch(ns, path, depth).then((res) => {
               setResponse(res);
               setLoaded(true);
             });
           },
-          [ns, path, loaded]
+          [ns, path, loaded, depth]
         );
 
         return {

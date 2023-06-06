@@ -410,7 +410,29 @@ export type FolderIntegrationApi = {
       depth?: number;
     }
   ) => CatalogueService;
-  createItem: () => Promise<any>;
+  createItem: (
+    parentPath: string,
+    name: string,
+    type: string,
+    meta: any,
+    ns?: string
+  ) => Promise<any>;
+  createShortcut: (
+    sourcePath: string,
+    destinationPath: string,
+    itemName: string,
+    ns?: string
+  ) => Promise<any>;
+  update: (path: string, meta: any, security: any, ns?: string) => Promise<any>;
+  rename: (
+    path: string,
+    newParentPath: string,
+    newName: string,
+    ns?: string
+  ) => Promise<any>;
+  deleteMany: (paths: string[], ns?: string) => Promise<any>;
+  writeFile: (filePath: string, content: any, ns?: string) => Promise<any>;
+  readFile: (filePath: string, ns?: string) => Promise<any>;
 };
 
 export function createFolderApis(
@@ -420,7 +442,32 @@ export function createFolderApis(
 ): () => FolderIntegrationApi {
   return () => {
     return {
-      createItem: async () => {},
+      createItem: (parentPath, name, type, meta, ns = 'default') => {
+        return controller.create(ns, parentPath, name, type, meta);
+      },
+      createShortcut(sourcePath, destinationPath, itemName, ns = 'default') {
+        return controller.createShortcut(
+          ns,
+          sourcePath,
+          destinationPath,
+          itemName
+        );
+      },
+      update: (path, meta, security, ns = 'default') => {
+        return controller.update(ns, path, meta, security);
+      },
+      rename(path, newParentPath, newName, ns = 'default') {
+        return controller.rename(ns, path, newParentPath, newName);
+      },
+      deleteMany(paths, ns = 'default') {
+        return controller.deleteMany(ns, paths);
+      },
+      writeFile(filePath, content, ns = 'default') {
+        return controller.writeFile(ns, filePath, content);
+      },
+      readFile(filePath, ns = 'default') {
+        return controller.readFile(ns, filePath);
+      },
       useCataloguePath(id, path, opts) {
         const { autoFetch, useRedux, ns, depth } = React.useMemo(() => {
           const def = {

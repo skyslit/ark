@@ -33,7 +33,10 @@ type ItemSecurity = {
 export type FolderOperationsApi = {
   fetchContent: (
     namespace: string,
-    path: string
+    path: string,
+    validateUserAccess: boolean,
+    user?: any,
+    maxDepth?: number
   ) => Promise<{ currentDir: Item; items: Item[] }>;
   addItem: (
     namespace: string,
@@ -196,7 +199,83 @@ export function createDynamicsV2Services(
       return `dyn_${ns}_${collName}`;
     };
 
-    const fetchContent = async (namespace: string, path: string) => {
+    const populateItems = async (
+      namespace: string,
+      obj: {
+        path: string;
+        destinationPath: string;
+        isSymLink: boolean;
+        items: any[];
+      },
+      validateUserAccess: boolean,
+      maxDepth: number = 0,
+      depth: number = 0,
+      user: any = undefined,
+      rootPermissionResult: PermissionResult = undefined
+    ) => {
+      if (!Array.isArray(obj?.items)) {
+        obj.items = [];
+      }
+
+      const itemPath = obj.isSymLink === true ? obj.destinationPath : obj.path;
+
+      let canRead = false;
+
+      if (!validateUserAccess) {
+        canRead = true;
+      } else {
+        let permissionResult: PermissionResult = rootPermissionResult;
+
+        if (!permissionResult) {
+          permissionResult = await getItemPermission(
+            namespace,
+            itemPath,
+            user,
+            permissionDataServer
+          );
+        }
+
+        canRead = permissionResult.claims.read === true;
+      }
+
+      if (canRead === false) {
+        return obj;
+      }
+
+      if (depth > maxDepth) {
+        return obj;
+      }
+
+      obj.items = (
+        await PowerWidgetNavItems.find({
+          namespace,
+          parentPath: itemPath,
+        })
+      ).map((o) => o.toObject());
+
+      let i: number;
+      for (i = 0; i < obj.items.length; i++) {
+        obj.items[i] = await populateItems(
+          namespace,
+          obj.items[i],
+          validateUserAccess,
+          maxDepth,
+          depth + 1,
+          user
+        );
+      }
+
+      return obj;
+    };
+
+    const fetchContent = async (
+      namespace: string,
+      path: string,
+      validateUserAccess: boolean,
+      user: any = undefined,
+      maxDepth: number = 0,
+      rootPermissionResult: PermissionResult = undefined
+    ) => {
       const res = {
         currentDir: null,
         items: [],
@@ -212,16 +291,24 @@ export function createDynamicsV2Services(
           meta: {},
         };
       } else {
-        res.currentDir = await PowerWidgetNavItems.findOne({
-          namespace,
-          path,
-        });
+        res.currentDir = (
+          await PowerWidgetNavItems.findOne({
+            namespace,
+            path,
+          })
+        ).toObject();
       }
 
-      res.items = await PowerWidgetNavItems.find({
+      const root = await populateItems(
         namespace,
-        parentPath: path,
-      });
+        res.currentDir,
+        validateUserAccess,
+        maxDepth,
+        0,
+        user,
+        rootPermissionResult
+      );
+      res.items = root?.items;
 
       return res;
     };
@@ -582,11 +669,16 @@ export function createDynamicsV2Services(
           Joi.object({
             namespace: Joi.string().required(),
             path: Joi.string(),
+            depth: Joi.number().optional(),
           })
         );
 
         opts.defineLogic(async (opts) => {
-          const { namespace, path } = opts.args.input;
+          let { namespace, path, depth } = opts.args.input;
+
+          if (typeof depth !== 'number') {
+            depth = 0;
+          }
 
           const permissionResult = await getItemPermission(
             namespace,
@@ -605,7 +697,14 @@ export function createDynamicsV2Services(
             claims: permissionResult.claims,
           };
 
-          const fetchResponse = await fetchContent(namespace, path);
+          const fetchResponse = await fetchContent(
+            namespace,
+            path,
+            true,
+            opts.args.user,
+            depth,
+            permissionResult
+          );
           if (fetchResponse) {
             res.currentDir = fetchResponse.currentDir;
             res.items = fetchResponse.items;

@@ -132,12 +132,13 @@ export class Controller {
     [key: string]: ControllerNamespace;
   } = {};
 
-  async fetch(ns: string, path: string): Promise<Response> {
+  async fetch(ns: string, path: string, depth: number = 0): Promise<Response> {
     const res = await axios.post(
       '/___service/main/powerserver___fetch-content',
       {
         namespace: ns,
         path,
+        depth,
       }
     );
 

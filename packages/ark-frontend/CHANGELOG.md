@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.39.0](https://github.com/skyslit/ark/compare/v2.38.5...v2.39.0) (2023-06-06)
+
+
+### Features
+
+* added depth fetch feature ([ef772cb](https://github.com/skyslit/ark/commit/ef772cb4f2732f501b901c587508e85c34e186f6))
+
+
+
+
+
 ## [2.38.5](https://github.com/skyslit/ark/compare/v2.38.4...v2.38.5) (2023-06-05)
 
 

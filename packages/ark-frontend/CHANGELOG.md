@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.40.0](https://github.com/skyslit/ark/compare/v2.39.0...v2.40.0) (2023-06-06)
+
+
+### Features
+
+* added more apis in useFolder() ([8276077](https://github.com/skyslit/ark/commit/827607761ec033ac25aa9ef45cc865884a0cc963))
+
+
+
+
+
 # [2.39.0](https://github.com/skyslit/ark/compare/v2.38.5...v2.39.0) (2023-06-06)
 
 

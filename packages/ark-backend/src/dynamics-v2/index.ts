@@ -291,12 +291,14 @@ export function createDynamicsV2Services(
           meta: {},
         };
       } else {
-        res.currentDir = (
-          await PowerWidgetNavItems.findOne({
-            namespace,
-            path,
-          })
-        ).toObject();
+        res.currentDir = await PowerWidgetNavItems.findOne({
+          namespace,
+          path,
+        });
+
+        if (res?.currentDir && res?.currentDir?.toObject) {
+          res.currentDir = res.currentDir.toObject();
+        }
       }
 
       const root = await populateItems(

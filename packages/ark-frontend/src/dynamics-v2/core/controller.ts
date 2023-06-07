@@ -29,6 +29,7 @@ export type CustomType = {
   fileSchema?: any;
   propertiesSchema?: any;
   fileCollectionName?: any;
+  allowedChildCustomTypes?: string[];
 };
 
 export class ControllerNamespace {

@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.41.0](https://github.com/skyslit/ark/compare/v2.40.0...v2.41.0) (2023-06-07)
+
+
+### Bug Fixes
+
+* issue with toObject ([9a3810f](https://github.com/skyslit/ark/commit/9a3810fa2080177ae96e28cf35f2147ef3f08512))
+
+
+
+
+
 # [2.40.0](https://github.com/skyslit/ark/compare/v2.39.0...v2.40.0) (2023-06-06)
 
 **Note:** Version bump only for package @skyslit/ark-backend

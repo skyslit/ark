@@ -3,6 +3,33 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.42.0](https://github.com/skyslit/ark/compare/v2.41.0...v2.42.0) (2023-06-08)
+
+
+### Features
+
+* added ensurePaths() ([66b1320](https://github.com/skyslit/ark/commit/66b1320fba134c555f1891f6b8ee0ae84ce02cb5))
+
+
+
+
+
+# [2.41.0](https://github.com/skyslit/ark/compare/v2.40.0...v2.41.0) (2023-06-07)
+
+
+### Bug Fixes
+
+* issue with toObject ([9a3810f](https://github.com/skyslit/ark/commit/9a3810fa2080177ae96e28cf35f2147ef3f08512))
+
+
+### Features
+
+* added allowed child custom types ([dadd7f9](https://github.com/skyslit/ark/commit/dadd7f95f96c8fa9cd6af2e564c82503a9443b50))
+
+
+
+
+
 # [2.40.0](https://github.com/skyslit/ark/compare/v2.39.0...v2.40.0) (2023-06-06)
 
 

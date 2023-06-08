@@ -31,11 +31,42 @@ type ItemSecurity = {
   permissions: [];
 };
 
+type MetaSyncAutomator = (api: {
+  file: any;
+  updateMeta: (diff: any) => void;
+}) => Promise<void> | void;
+type DynamicsAutomator = MetaSyncAutomator;
+type AutomatorEntry = {
+  type: 'meta-sync';
+  automator: DynamicsAutomator;
+};
+
+type AutomatorTypes = 'meta-sync';
+
+export const Automators = {
+  createMetaSyncAutomator: (automator: MetaSyncAutomator): AutomatorEntry => {
+    return {
+      type: 'meta-sync',
+      automator,
+    };
+  },
+};
+
 export type FolderOperationsApi = {
+  automate: (
+    namespace: string,
+    type: string,
+    automator: AutomatorTypes
+  ) => Promise<any>;
   ensurePaths: (
     namespace: string,
     pathObjs: Array<Partial<Item>>
   ) => Promise<boolean>;
+  defineAutomation: (
+    namespace: string,
+    type: string,
+    automator: AutomatorEntry
+  ) => void;
   fetchContent: (
     namespace: string,
     path: string,
@@ -629,7 +660,7 @@ export function createDynamicsV2Services(
       filePath: string,
       content: any
     ) => {
-      const item = (await PowerWidgetNavItems.findOne({
+      let item = (await PowerWidgetNavItems.findOne({
         namespace,
         path: filePath,
       }).exec()) as any;
@@ -637,6 +668,10 @@ export function createDynamicsV2Services(
       let writeOp = null;
 
       if (item) {
+        if (item?.toObject) {
+          item = item.toObject();
+        }
+
         const fileCollectionName = item?.meta?.fileCollectionName || 'default';
         const collName = getFullFileCollectionName(
           namespace,
@@ -654,6 +689,17 @@ export function createDynamicsV2Services(
           },
           { upsert: true }
         );
+
+        let newMeta = item.meta;
+
+        await automate(namespace, item.type, 'meta-sync', {
+          file: content,
+          updateMeta: (diff: any) => {
+            newMeta = Object.assign(newMeta, diff);
+          },
+        });
+
+        await updateItemMeta(namespace, filePath, newMeta);
       }
 
       return writeOp;
@@ -680,7 +726,7 @@ export function createDynamicsV2Services(
             path.parentPath,
             path.name,
             path.type,
-            path.meta,
+            path.meta || {},
             path.security,
             path.isSymLink,
             path.destinationPath,
@@ -694,8 +740,59 @@ export function createDynamicsV2Services(
       return true;
     };
 
+    /** Registry to store all automation functions */
+    const backendAutomationRegistry: any = {};
+
+    const defineAutomation = (
+      namespace: string,
+      type: string,
+      automator: AutomatorEntry
+    ) => {
+      if (!backendAutomationRegistry[namespace]) {
+        backendAutomationRegistry[namespace] = {};
+      }
+
+      if (!Array.isArray(backendAutomationRegistry[namespace][type])) {
+        backendAutomationRegistry[namespace][type] = [];
+      }
+
+      backendAutomationRegistry[namespace][type].push(automator);
+    };
+
+    const automate = async (
+      namespace: string,
+      type: string,
+      automatorType: AutomatorTypes,
+      ...args: any[]
+    ) => {
+      const automators: AutomatorEntry[] = (() => {
+        try {
+          if (backendAutomationRegistry[namespace]) {
+            if (Array.isArray(backendAutomationRegistry[namespace][type])) {
+              return backendAutomationRegistry[namespace][type].filter(
+                (automator) => automator.type === automatorType
+              );
+            }
+          }
+        } catch (e) {}
+
+        return [];
+      })();
+
+      for (const automator of automators) {
+        try {
+          // @ts-ignore
+          await Promise.resolve(automator.automator(...args));
+        } catch (e) {
+          console.error(e);
+        }
+      }
+    };
+
     const folderOpApi: FolderOperationsApi = {
+      automate,
       ensurePaths,
+      defineAutomation,
       fetchContent,
       addItem,
       renameItem,

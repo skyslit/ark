@@ -12,6 +12,7 @@ import {
   PermissionResult,
   getItemPermission,
 } from './utils/get-item-permission';
+import { extractPaths } from './utils/get-item-permission';
 
 type Item = {
   name: string;
@@ -31,6 +32,10 @@ type ItemSecurity = {
 };
 
 export type FolderOperationsApi = {
+  ensurePaths: (
+    namespace: string,
+    pathObjs: Array<Partial<Item>>
+  ) => Promise<boolean>;
   fetchContent: (
     namespace: string,
     path: string,
@@ -46,7 +51,8 @@ export type FolderOperationsApi = {
     meta: any,
     security?: any,
     isSymLink?: boolean,
-    destinationPath?: string
+    destinationPath?: string,
+    suppressExistsError?: boolean
   ) => Promise<Item>;
   renameItem: (
     namespace: string,
@@ -323,7 +329,8 @@ export function createDynamicsV2Services(
       meta: any,
       security: ItemSecurity = { permissions: [] },
       isSymLink: boolean = false,
-      destinationPath: string = null
+      destinationPath: string = null,
+      suppressExistsError: boolean = false
     ) => {
       const slug = encodeURIComponent(
         String(name)
@@ -338,9 +345,17 @@ export function createDynamicsV2Services(
       });
 
       if (Boolean(exists)) {
-        throw new Error(
-          `slug ${slug} already exists in parent path ${parentPath}`
-        );
+        if (suppressExistsError === false) {
+          throw new Error(
+            `slug ${slug} already exists in parent path ${parentPath}`
+          );
+        } else {
+          if (exists?.toObject) {
+            return exists.toObject();
+          } else {
+            return exists;
+          }
+        }
       }
 
       const item = new PowerWidgetNavItems({
@@ -644,7 +659,43 @@ export function createDynamicsV2Services(
       return writeOp;
     };
 
+    const ensurePaths = async (
+      namespace: string,
+      pathObjs: Array<Partial<Item>>
+    ) => {
+      pathObjs = pathObjs.sort((a, b) => {
+        if (a.parentPath > b.parentPath) {
+          return 1;
+        } else if (a.parentPath < b.parentPath) {
+          return -1;
+        } else {
+          return 0;
+        }
+      });
+
+      for (const path of pathObjs) {
+        try {
+          await addItem(
+            namespace,
+            path.parentPath,
+            path.name,
+            path.type,
+            path.meta,
+            path.security,
+            path.isSymLink,
+            path.destinationPath,
+            true
+          );
+        } catch (e) {
+          throw e;
+        }
+      }
+
+      return true;
+    };
+
     const folderOpApi: FolderOperationsApi = {
+      ensurePaths,
       fetchContent,
       addItem,
       renameItem,

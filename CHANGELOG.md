@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.43.0](https://github.com/skyslit/ark/compare/v2.42.0...v2.43.0) (2023-06-09)
+
+
+### Features
+
+* added automator ([0c1344a](https://github.com/skyslit/ark/commit/0c1344a04c20cc3efe0ff2fda407948d8236655c))
+
+
+
+
+
 # [2.42.0](https://github.com/skyslit/ark/compare/v2.41.0...v2.42.0) (2023-06-08)
 
 

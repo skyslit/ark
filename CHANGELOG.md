@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.44.0](https://github.com/skyslit/ark/compare/v2.43.0...v2.44.0) (2023-06-09)
+
+
+### Features
+
+* added toolkit upgrade option ([b89744c](https://github.com/skyslit/ark/commit/b89744c0cd9a9316764587c6ca26925df5a9caa5))
+
+
+
+
+
 # [2.43.0](https://github.com/skyslit/ark/compare/v2.42.0...v2.43.0) (2023-06-09)
 
 

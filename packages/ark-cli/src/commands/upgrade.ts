@@ -10,6 +10,12 @@ const optionDefs = [
     type: Boolean,
     description: 'Display help information about this command',
   },
+  {
+    name: 'toolkit',
+    alias: 't',
+    type: Boolean,
+    description: 'Upgrade toolkit to latest',
+  },
 ];
 
 export default (argv?: string[]) => {
@@ -17,6 +23,8 @@ export default (argv?: string[]) => {
     argv: argv || [],
     stopAtFirstUnknown: true,
   });
+
+  const shouldUpgradeToolkit = options?.toolkit === true;
 
   if (options.help) {
     console.log(
@@ -37,7 +45,7 @@ export default (argv?: string[]) => {
       ])
     );
   } else {
-    upgrade()
+    upgrade(undefined, shouldUpgradeToolkit)
       .then(() => {
         process.exit(0);
       })

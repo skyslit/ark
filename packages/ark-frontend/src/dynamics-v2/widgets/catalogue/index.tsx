@@ -36,6 +36,7 @@ type ClipboardObject = {
 };
 
 type CatalogueApi = {
+  refresh: (silent?: boolean) => Promise<any>;
   createItem: (name: string, type: string, payload?: any) => Promise<any>;
   deleteItems: (paths: string[]) => Promise<void>;
   renameItem: (
@@ -291,34 +292,42 @@ function createCatalogue(props: PropType): CatalogueApi {
     return item?.path;
   }, []);
 
-  React.useEffect(() => {
-    prevPathRef.current = path;
-    setDirLoading(true);
-    setClaims({
-      owner: false,
-      read: false,
-      write: false,
-    });
-    setCurrentDir(null);
-    setItems([]);
-
-    if (namespace) {
-      namespace
-        .fetch(path)
-        .then((res) => {
-          setDirLoading(false);
-          if (res.currentDir && res.items) {
-            setCurrentDir(res.currentDir);
-            setItems(res.items);
-            setClaims(res.claims);
-          }
-        })
-        .catch((err) => {
-          setDirLoading(false);
-          console.error(err);
+  const refresh = React.useCallback(
+    async (silent: boolean = false) => {
+      prevPathRef.current = path;
+      if (silent === false) {
+        setDirLoading(true);
+        setClaims({
+          owner: false,
+          read: false,
+          write: false,
         });
-    }
-    namespace;
+        setCurrentDir(null);
+        setItems([]);
+      }
+
+      if (namespace) {
+        return namespace
+          .fetch(path)
+          .then((res) => {
+            setDirLoading(false);
+            if (res.currentDir && res.items) {
+              setCurrentDir(res.currentDir);
+              setItems(res.items);
+              setClaims(res.claims);
+            }
+          })
+          .catch((err) => {
+            setDirLoading(false);
+            console.error(err);
+          });
+      }
+    },
+    [path, namespace]
+  );
+
+  React.useEffect(() => {
+    refresh();
   }, [path, namespace]);
 
   const bufferred_dirLoading = React.useMemo(() => {
@@ -372,6 +381,7 @@ function createCatalogue(props: PropType): CatalogueApi {
   );
 
   return {
+    refresh,
     findNextUniqueName,
     path,
     setPath,
@@ -543,10 +553,7 @@ export function useCataloguePath(
   autoFetch: boolean = true,
   useRedux: boolean = false
 ): CatalogueService {
-  const ark = useArkReactServices();
-  console.log('int>ark', ark);
   const { use } = useArkReactServices();
-  console.log('use', use);
   const { useStore } = use(Frontend);
   const [loaded, setLoaded] = useStore<boolean>(
     `use-catalogue-path-${id}-loaded`,

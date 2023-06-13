@@ -57,6 +57,7 @@ import {
 } from 'redis';
 import { createAdapter } from '@socket.io/redis-adapter';
 import { FolderOperationsApi, createDynamicsV2Services } from './dynamics-v2';
+import stream from 'stream';
 
 type HttpVerbs =
   | 'all'
@@ -307,6 +308,8 @@ export interface IArkVolume {
   rename: (oldPath: string, newPath: string) => Promise<any>;
   delete: (path: string) => Promise<any>;
   getDownloadHandler: () => Array<Handler>;
+  createWriteStream: (fileName: string) => stream.Writable;
+  createReadStream: (fileName: string) => stream.Readable;
 }
 
 /**
@@ -397,6 +400,18 @@ export class FileVolume implements IArkVolume {
    */
   getDownloadHandler(): Array<Handler> {
     return [expressApp.static(this.opts.baseDir)];
+  }
+
+  createWriteStream(fileName: string): stream.Writable {
+    const fullPath = path.join(this.opts.baseDir, fileName);
+    ensureDir(path.dirname(fullPath));
+    return fs.createWriteStream(path.join(this.opts.baseDir, fileName));
+  }
+
+  createReadStream(fileName: string): stream.Readable {
+    const fullPath = path.join(this.opts.baseDir, fileName);
+    ensureDir(path.dirname(fullPath));
+    return fs.createReadStream(path.join(this.opts.baseDir, fileName));
   }
 }
 
@@ -1905,7 +1920,7 @@ export const Backend = createPointer<Ark.Backend>(
       }
     },
     enableDynamicsV2Services: (conf?) => {
-      return createDynamicsV2Services(context, moduleId, conf);
+      return createDynamicsV2Services(context, controller, moduleId, conf);
     },
     useRemoteConfig: (initialState, dbName) => {
       dbName = dbName ? dbName : 'default';
@@ -2074,7 +2089,11 @@ export type LogicDefinitionOptions = {
 
 export type LogicDefinition = (
   options: LogicDefinitionOptions
-) => ServiceResponse<any, any> | Promise<ServiceResponse<any, any>> | void;
+) =>
+  | ServiceResponse<any, any>
+  | Promise<ServiceResponse<any, any>>
+  | void
+  | Promise<void>;
 
 export type CapabilityMeta = {
   serviceName: string;

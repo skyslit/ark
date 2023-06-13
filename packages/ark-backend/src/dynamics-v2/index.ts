@@ -1,5 +1,6 @@
-import { ApplicationContext } from '@skyslit/ark-core';
+import { ApplicationContext, ControllerContext } from '@skyslit/ark-core';
 import {
+  Data,
   DynamicsServerV2Config,
   defineService,
   useServiceCreator,
@@ -13,6 +14,9 @@ import {
   getItemPermission,
 } from './utils/get-item-permission';
 import { extractPaths } from './utils/get-item-permission';
+import busboy from 'busboy';
+import fs from 'fs';
+import stream from 'stream';
 
 type Item = {
   name: string;
@@ -53,6 +57,19 @@ export const Automators = {
 };
 
 export type FolderOperationsApi = {
+  writeBinaryFile: (
+    namespace: string,
+    parentPath: string,
+    name: string,
+    type: string,
+    file: stream.Readable,
+    meta: any,
+    binaryMeta: {
+      encoding: string;
+      mimeType: string;
+    },
+    security?: ItemSecurity
+  ) => Promise<void>;
   automate: (
     namespace: string,
     type: string,
@@ -83,7 +100,7 @@ export type FolderOperationsApi = {
     security?: any,
     isSymLink?: boolean,
     destinationPath?: string,
-    suppressExistsError?: boolean
+    alreadyExistsErrorHandleStrategy?: 'throw' | 'supress' | 'resolve'
   ) => Promise<Item>;
   renameItem: (
     namespace: string,
@@ -128,9 +145,18 @@ export type FolderOperationsApi = {
 
 export function createDynamicsV2Services(
   context: ApplicationContext,
+  controller: ControllerContext<any>,
   moduleId: string,
   conf: DynamicsServerV2Config
 ) {
+  const { useVolume } = context.generatePointer(
+    moduleId,
+    controller,
+    context,
+    Data
+  );
+  const storageBucket = useVolume();
+
   if (!conf) {
     conf = {};
   }
@@ -203,6 +229,11 @@ export function createDynamicsV2Services(
         },
         meta: {
           type: Object,
+        },
+        binaryMeta: {
+          type: Object,
+          default: null,
+          required: false,
         },
         security: {
           type: Object,
@@ -361,30 +392,46 @@ export function createDynamicsV2Services(
       security: ItemSecurity = { permissions: [] },
       isSymLink: boolean = false,
       destinationPath: string = null,
-      suppressExistsError: boolean = false
+      alreadyExistsErrorHandleStrategy:
+        | 'throw'
+        | 'supress'
+        | 'resolve' = 'throw'
     ) => {
-      const slug = encodeURIComponent(
-        String(name)
-          .replace(/\W+(?!$)/g, '-')
-          .toLowerCase()
-          .replace(/\W$/, '')
-      );
-      const exists = await PowerWidgetNavItems.findOne({
-        namespace,
-        parentPath,
-        slug,
-      });
+      let slug: string = '';
+      let nameUnique: boolean = false;
+      let attempt: number = 1;
+      while (nameUnique === false) {
+        slug = encodeURIComponent(
+          String(name)
+            .replace(/\W+(?!$)/g, '-')
+            .toLowerCase()
+            .replace(/\W$/, '')
+        );
 
-      if (Boolean(exists)) {
-        if (suppressExistsError === false) {
-          throw new Error(
-            `slug ${slug} already exists in parent path ${parentPath}`
-          );
-        } else {
-          if (exists?.toObject) {
-            return exists.toObject();
+        const exists = await PowerWidgetNavItems.findOne({
+          namespace,
+          parentPath,
+          slug,
+        });
+
+        nameUnique = !Boolean(exists);
+
+        if (!nameUnique) {
+          if (alreadyExistsErrorHandleStrategy === 'throw') {
+            throw new Error(
+              `slug ${slug} already exists in parent path ${parentPath}`
+            );
+          } else if (alreadyExistsErrorHandleStrategy === 'resolve') {
+            name = `(${attempt}) ${name}`;
+            attempt++;
+            continue;
           } else {
-            return exists;
+            // supress
+            if (exists?.toObject) {
+              return exists.toObject();
+            } else {
+              return exists;
+            }
           }
         }
       }
@@ -498,9 +545,11 @@ export function createDynamicsV2Services(
 
       for (const item of allItems) {
         let shouldDeleteFile = Boolean(item?.meta?.fileCollectionName);
+        let shouldDeleteBinaryFile = Boolean(item?.type === 'binary');
 
         if (item?.isSymLink === true) {
           shouldDeleteFile = false;
+          shouldDeleteBinaryFile = false;
         }
 
         if (shouldDeleteFile) {
@@ -512,6 +561,12 @@ export function createDynamicsV2Services(
           await mongooseConnection.db.collection(collName).deleteOne({
             _id: item._id,
           });
+        }
+
+        if (shouldDeleteBinaryFile) {
+          await storageBucket.delete(
+            require('path').join(namespace, String(item._id))
+          );
         }
 
         await item.delete();
@@ -730,7 +785,7 @@ export function createDynamicsV2Services(
             path.security,
             path.isSymLink,
             path.destinationPath,
-            true
+            'supress'
           );
         } catch (e) {
           throw e;
@@ -789,7 +844,118 @@ export function createDynamicsV2Services(
       }
     };
 
+    const writeBinaryFile = async (
+      namespace: string,
+      parentPath: string,
+      name: string,
+      type: string,
+      file: stream.Readable,
+      meta: any,
+      binaryMeta: {
+        encoding: string;
+        mimeType: string;
+      },
+      security: ItemSecurity = { permissions: [] }
+    ) => {
+      let fileLengthInBytes: number = 0;
+
+      const fileItem = await addItem(
+        namespace,
+        parentPath,
+        name,
+        type,
+        meta,
+        security,
+        false,
+        null,
+        'resolve'
+      );
+
+      if (!fileItem) {
+        throw new Error(`Error while creating binary file`);
+      }
+
+      file.on('data', (data) => {
+        fileLengthInBytes = data.length;
+      });
+
+      file.on('close', async () => {
+        const op = await PowerWidgetNavItems.updateOne(
+          {
+            namespace,
+            path: fileItem.path,
+          },
+          {
+            $set: {
+              binaryMeta: {
+                ...binaryMeta,
+                fileLengthInBytes,
+              },
+            },
+          }
+        );
+      });
+
+      file.on('error', (err) => {
+        throw err;
+      });
+
+      file.pipe(
+        storageBucket.createWriteStream(
+          path.join(namespace, String(fileItem._id))
+        )
+      );
+    };
+
+    const readBinaryFile = async (
+      namespace: string,
+      filePath: string
+    ): Promise<{
+      readable: stream.Readable;
+      mimeType: string;
+      encoding: string;
+      fileName: string;
+    }> => {
+      const item: any = await PowerWidgetNavItems.findOne({
+        namespace,
+        path: filePath,
+      });
+
+      if (!item) {
+        throw new Error(`Item not found`);
+      }
+
+      if (item?.type !== 'binary') {
+        throw new Error('Only binary file can be read using this handler.');
+      }
+
+      return {
+        readable: storageBucket.createReadStream(
+          path.join(namespace, String(item._id))
+        ),
+        mimeType: (() => {
+          if (item?.binaryMeta?.mimeType) {
+            return item?.binaryMeta?.mimeType;
+          }
+          return null;
+        })(),
+        encoding: (() => {
+          if (item?.binaryMeta?.encoding) {
+            return item?.binaryMeta?.encoding;
+          }
+          return null;
+        })(),
+        fileName: (() => {
+          if (item?.name) {
+            return item?.name;
+          }
+          return null;
+        })(),
+      };
+    };
+
     const folderOpApi: FolderOperationsApi = {
+      writeBinaryFile,
       automate,
       ensurePaths,
       defineAutomation,
@@ -1137,6 +1303,122 @@ export function createDynamicsV2Services(
           return opts.success({ ack: true, namespace, writeOp }, []);
         });
       })
+    );
+
+    /** Upload files */
+    useService(
+      defineService('powerserver___upload-files', (opts) => {
+        opts.defineValidator(
+          Joi.object({
+            namespace: Joi.string().required(),
+            parentPath: Joi.string().required(),
+          })
+        );
+
+        opts.defineLogic(async (opts) => {
+          const { namespace, parentPath } = opts.args.input;
+
+          const permissionResult = await getItemPermission(
+            namespace,
+            parentPath,
+            opts.args.user,
+            permissionDataServer
+          );
+
+          if (permissionResult?.claims?.write !== true) {
+            return opts.error(new Error('Unauthorized'), 401);
+          }
+
+          const stream = busboy({ headers: opts.args.req.headers, limits: {} });
+          stream.on('file', (name, file, info) => {
+            const { filename, encoding, mimeType } = info;
+
+            writeBinaryFile(
+              namespace,
+              parentPath,
+              filename,
+              'binary',
+              file,
+              {},
+              {
+                encoding,
+                mimeType,
+              }
+            ).catch((err) => {
+              stream.destroy(err);
+            });
+          });
+          stream.on('field', (name, val, info) => {});
+          stream.on('finish', () => {
+            opts.args.res.json({ ack: true });
+          });
+          stream.on('error', (err: any) => {
+            opts.args.res
+              .status(400)
+              .json({ message: err?.message || 'Upload failed' });
+          });
+
+          opts.args.req.pipe(stream);
+        });
+      })
+    );
+
+    /** Download file */
+    useService(
+      defineService('powerserver___download-file', (opts) => {
+        opts.defineValidator(
+          Joi.object({
+            namespace: Joi.string().required(),
+            filePath: Joi.string().required(),
+            attachment: Joi.string().optional(),
+          })
+        );
+
+        opts.defineLogic(async (opts) => {
+          const { namespace, filePath, attachment } = opts.args.input;
+
+          const isAttachment = String(attachment) === 'true';
+
+          const permissionResult = await getItemPermission(
+            namespace,
+            filePath,
+            opts.args.user,
+            permissionDataServer
+          );
+
+          if (permissionResult?.claims?.read !== true) {
+            return opts.error(new Error('Unauthorized'), 401);
+          }
+
+          try {
+            const result = await readBinaryFile(namespace, filePath);
+
+            if (result.mimeType) {
+              opts.args.res.setHeader('Content-Type', result.mimeType);
+            }
+
+            if (result.encoding) {
+              opts.args.res.setHeader('Content-Encoding', result.encoding);
+            }
+
+            if (isAttachment === true) {
+              if (result.fileName) {
+                opts.args.res.setHeader(
+                  'Content-Disposition',
+                  `attachment; filename="${result.fileName}"`
+                );
+              }
+            }
+
+            result.readable.pipe(opts.args.res);
+          } catch (e) {
+            return opts.error({ message: e.message }, 400);
+          }
+        });
+      }),
+      {
+        method: 'get',
+      }
     );
   }
 }

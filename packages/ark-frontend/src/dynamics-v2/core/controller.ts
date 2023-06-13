@@ -1,6 +1,7 @@
 import axios from 'axios';
 
 export type Item = {
+  namespace: string;
   name: string;
   parentPath: string;
   path: string;

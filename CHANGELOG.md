@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.45.0](https://github.com/skyslit/ark/compare/v2.44.0...v2.45.0) (2023-06-13)
+
+
+### Features
+
+* added binary file upload capability ([26fc31e](https://github.com/skyslit/ark/commit/26fc31ec72f0202f267a7513a7cd19aac6513f82))
+
+
+
+
+
 # [2.44.0](https://github.com/skyslit/ark/compare/v2.43.0...v2.44.0) (2023-06-09)
 
 

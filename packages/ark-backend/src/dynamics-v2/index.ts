@@ -1365,7 +1365,7 @@ export function createDynamicsV2Services(
 
     /** Download file */
     useService(
-      defineService('powerserver___download-file', (opts) => {
+      defineService('powerserver___stream-file', (opts) => {
         opts.defineValidator(
           Joi.object({
             namespace: Joi.string().required(),

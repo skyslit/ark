@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.45.1](https://github.com/skyslit/ark/compare/v2.45.0...v2.45.1) (2023-06-17)
+
+
+### Bug Fixes
+
+* issue with populate ([c27baa5](https://github.com/skyslit/ark/commit/c27baa5f283197053e546c2d3ed6100552514ce9))
+
+
+
+
+
 # [2.45.0](https://github.com/skyslit/ark/compare/v2.44.0...v2.45.0) (2023-06-13)
 
 

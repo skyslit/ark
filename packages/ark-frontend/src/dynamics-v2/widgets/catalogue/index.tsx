@@ -421,17 +421,21 @@ function createCatalogue(props: PropType): CatalogueApi {
   };
 }
 
+export type UsePathApi = (
+  id: string,
+  path: string,
+  opts?: {
+    autoFetch?: boolean;
+    useRedux?: boolean;
+    ns?: string;
+    depth?: number;
+    searchDebounceInMs?: number;
+  }
+) => CatalogueService;
+
 export type FolderIntegrationApi = {
-  useCataloguePath: (
-    id: string,
-    path: string,
-    opts?: {
-      autoFetch?: boolean;
-      useRedux?: boolean;
-      ns?: string;
-      depth?: number;
-    }
-  ) => CatalogueService;
+  usePath: UsePathApi;
+  useCataloguePath: UsePathApi;
   createItem: (
     parentPath: string,
     name: string,
@@ -491,59 +495,9 @@ export function createFolderApis(
         return controller.readFile(ns, filePath);
       },
       useCataloguePath(id, path, opts) {
-        const { autoFetch, useRedux, ns, depth } = React.useMemo(() => {
-          const def = {
-            autoFetch: true,
-            useRedux: false,
-            ns: 'default',
-            depth: 0,
-          };
-
-          return Object.assign({}, def, opts || {});
-        }, [opts]);
-
-        const { use } = useArkReactServices();
-        const { useStore } = use(Frontend);
-        const [loaded, setLoaded] = useStore<boolean>(
-          `use-catalogue-path-${id}-loaded`,
-          false,
-          useRedux === false
-        );
-        const [response, setResponse] = useStore<Response>(
-          id,
-          null,
-          useRedux === false
-        );
-
-        React.useEffect(() => {
-          if (autoFetch === true) {
-            refresh();
-          }
-        }, [ns, path]);
-
-        const refresh = React.useCallback(
-          async (force = false) => {
-            if (loaded === true && force === false) {
-              return;
-            }
-
-            setLoaded(false);
-            setResponse(null);
-
-            return controller.fetch(ns, path, depth).then((res) => {
-              setResponse(res);
-              setLoaded(true);
-            });
-          },
-          [ns, path, loaded, depth]
-        );
-
-        return {
-          loaded,
-          response,
-          refresh,
-        };
+        return usePath(id, path, opts);
       },
+      usePath,
     };
   };
 }
@@ -554,21 +508,72 @@ export function useCatalogue(): CatalogueApi {
 
 type CatalogueService = {
   loaded: boolean;
+  loading: boolean;
   response: Response;
-  refresh: (force?: boolean) => Promise<void>;
+  refresh: (force?: boolean, aggregationStages?: any[]) => Promise<void>;
+  search: (aggregationStages: any[]) => void;
+  clearSearch: () => void;
 };
 
+/**
+ * @deprecated This function has been replaced with usePath function, please use that one instead
+ * @param id
+ * @param ns
+ * @param path
+ * @param autoFetch
+ * @param useRedux
+ * @param depth
+ * @param searchDebounceInMs
+ * @returns
+ */
 export function useCataloguePath(
   id: string,
   ns: string,
   path: string,
   autoFetch: boolean = true,
-  useRedux: boolean = false
+  useRedux: boolean = false,
+  depth: number = 0,
+  searchDebounceInMs: number = undefined
 ): CatalogueService {
+  return usePath(id, path, {
+    autoFetch,
+    depth,
+    ns,
+    searchDebounceInMs,
+    useRedux,
+  });
+}
+
+export const usePath: UsePathApi = (id, path, opts) => {
+  const {
+    autoFetch,
+    useRedux,
+    ns,
+    depth,
+    searchDebounceInMs,
+  } = React.useMemo(() => {
+    const def = {
+      autoFetch: true,
+      useRedux: false,
+      ns: 'default',
+      depth: 0,
+      searchDebounceInMs: 300,
+    };
+
+    return Object.assign({}, def, opts || {});
+  }, [opts]);
+
+  const debounceTimerRef = React.useRef(null);
+  const [aggregationStages, setAggregationStages] = React.useState<any[]>([]);
   const { use } = useArkReactServices();
   const { useStore } = use(Frontend);
   const [loaded, setLoaded] = useStore<boolean>(
-    `use-catalogue-path-${id}-loaded`,
+    `use-path-${id}-loaded`,
+    false,
+    useRedux === false
+  );
+  const [loading, setLoading] = useStore<boolean>(
+    `use-path-${id}-loading`,
     false,
     useRedux === false
   );
@@ -585,28 +590,69 @@ export function useCataloguePath(
   }, [ns, path]);
 
   const refresh = React.useCallback(
-    async (force = false) => {
+    async (force = false, aggregationStages: any[] = []) => {
       if (loaded === true && force === false) {
         return;
       }
 
       setLoaded(false);
+      setLoading(true);
       setResponse(null);
 
-      return controller.fetch(ns, path).then((res) => {
-        setResponse(res);
-        setLoaded(true);
-      });
+      return controller
+        .fetch(ns, path, depth)
+        .then((res) => {
+          setLoading(false);
+          setResponse(res);
+          setLoaded(true);
+        })
+        .catch((e) => {
+          console.error(e);
+          setLoading(false);
+        });
     },
-    [ns, path, loaded]
+    [ns, path, loaded, depth]
   );
+
+  const search = React.useCallback(
+    (aggregationStages: any[]) => {
+      setLoading(true);
+      setLoaded(false);
+      setResponse(null);
+      setAggregationStages(aggregationStages);
+    },
+    [refresh]
+  );
+
+  React.useEffect(() => {
+    clearTimeout(debounceTimerRef.current);
+    if (aggregationStages) {
+      debounceTimerRef.current = setTimeout(() => {
+        refresh(true, aggregationStages).then(() => setAggregationStages(null));
+      }, searchDebounceInMs);
+
+      return () => {
+        clearTimeout(debounceTimerRef.current);
+      };
+    }
+  }, [aggregationStages, searchDebounceInMs]);
+
+  const clearSearch = React.useCallback(() => {
+    clearTimeout(debounceTimerRef.current);
+    setLoaded(false);
+    setResponse(null);
+    setAggregationStages(null);
+  }, []);
 
   return {
     loaded,
+    loading,
     response,
     refresh,
+    search,
+    clearSearch,
   };
-}
+};
 
 export function Catalogue(props: PropType) {
   const api = createCatalogue(props);

@@ -89,7 +89,9 @@ export type FolderOperationsApi = {
     path: string,
     validateUserAccess: boolean,
     user?: any,
-    maxDepth?: number
+    maxDepth?: number,
+    rootPermissionResult?: PermissionResult,
+    aggregationStages?: any[]
   ) => Promise<{ currentDir: Item; items: Item[] }>;
   addItem: (
     namespace: string,
@@ -277,6 +279,7 @@ export function createDynamicsV2Services(
         items: any[];
       },
       validateUserAccess: boolean,
+      aggregationStages: any[],
       maxDepth: number = 0,
       depth: number = 0,
       user: any = undefined,
@@ -320,11 +323,24 @@ export function createDynamicsV2Services(
       }
 
       obj.items = (
-        await PowerWidgetNavItems.find({
-          namespace,
-          parentPath: itemPath,
-        })
-      ).map((o) => o.toObject());
+        await PowerWidgetNavItems.aggregate(
+          [
+            {
+              $match: {
+                namespace,
+                parentPath: itemPath,
+              },
+            },
+            ...aggregationStages,
+          ].filter(Boolean)
+        )
+      ).map((o) => {
+        if (typeof o?.toObject === 'function') {
+          return o.toObject();
+        }
+
+        return o;
+      });
 
       let i: number;
       for (i = 0; i < obj.items.length; i++) {
@@ -332,6 +348,7 @@ export function createDynamicsV2Services(
           namespace,
           obj.items[i],
           validateUserAccess,
+          aggregationStages,
           maxDepth,
           depth + 1,
           user
@@ -347,7 +364,8 @@ export function createDynamicsV2Services(
       validateUserAccess: boolean,
       user: any = undefined,
       maxDepth: number = 0,
-      rootPermissionResult: PermissionResult = undefined
+      rootPermissionResult: PermissionResult = undefined,
+      aggregationStages: any[] = []
     ) => {
       const res = {
         currentDir: null,
@@ -378,6 +396,7 @@ export function createDynamicsV2Services(
         namespace,
         res.currentDir,
         validateUserAccess,
+        aggregationStages,
         maxDepth,
         0,
         user,
@@ -1018,11 +1037,12 @@ export function createDynamicsV2Services(
             namespace: Joi.string().required(),
             path: Joi.string(),
             depth: Joi.number().optional(),
+            aggregationStages: Joi.array().optional(),
           })
         );
 
         opts.defineLogic(async (opts) => {
-          let { namespace, path, depth } = opts.args.input;
+          let { namespace, path, depth, aggregationStages } = opts.args.input;
 
           if (typeof depth !== 'number') {
             depth = 0;
@@ -1051,8 +1071,10 @@ export function createDynamicsV2Services(
             true,
             opts.args.user,
             depth,
-            permissionResult
+            permissionResult,
+            aggregationStages
           );
+
           if (fetchResponse) {
             res.currentDir = fetchResponse.currentDir;
             res.items = fetchResponse.items;

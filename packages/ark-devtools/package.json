@@ -1,6 +1,6 @@
 {
   "name": "@skyslit/ark-devtools",
-  "version": "2.45.1",
+  "version": "2.46.0",
   "description": "DevTools and Utilities that power up Ark based Software Applications",
   "main": "./build/index.js",
   "private": false,
@@ -20,9 +20,9 @@
   "devDependencies": {
     "@babel/plugin-proposal-class-properties": "^7.12.1",
     "@babel/plugin-syntax-dynamic-import": "^7.8.3",
-    "@skyslit/ark-backend": "^2.45.1",
+    "@skyslit/ark-backend": "^2.46.0",
     "@skyslit/ark-core": "^2.38.0",
-    "@skyslit/ark-frontend": "^2.45.0",
+    "@skyslit/ark-frontend": "^2.46.0",
     "@types/ejs": "^3.0.5",
     "@types/express": "^4.17.9",
     "@types/jest": "^26.0.15",

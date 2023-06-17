@@ -100,7 +100,8 @@ export type FolderOperationsApi = {
     security?: any,
     isSymLink?: boolean,
     destinationPath?: string,
-    alreadyExistsErrorHandleStrategy?: 'throw' | 'supress' | 'resolve'
+    alreadyExistsErrorHandleStrategy?: 'throw' | 'supress' | 'resolve',
+    ensurePath?: boolean
   ) => Promise<Item>;
   renameItem: (
     namespace: string,
@@ -281,6 +282,10 @@ export function createDynamicsV2Services(
       user: any = undefined,
       rootPermissionResult: PermissionResult = undefined
     ) => {
+      if (!obj) {
+        return obj;
+      }
+
       if (!Array.isArray(obj?.items)) {
         obj.items = [];
       }
@@ -395,8 +400,35 @@ export function createDynamicsV2Services(
       alreadyExistsErrorHandleStrategy:
         | 'throw'
         | 'supress'
-        | 'resolve' = 'throw'
+        | 'resolve' = 'throw',
+      ensurePath: boolean = true
     ) => {
+      if (ensurePath === true) {
+        const parents = extractPaths(parentPath);
+
+        let i: number = 0;
+        for (i = 0; i < parents.length; i++) {
+          if (parents[i] === '/') {
+            continue;
+          }
+
+          const name = parents[i].split('/').reverse()[0];
+
+          await addItem(
+            namespace,
+            parents[i - 1],
+            name,
+            'folder',
+            {},
+            { permissions: [] },
+            false,
+            null,
+            'supress',
+            false
+          );
+        }
+      }
+
       let slug: string = '';
       let nameUnique: boolean = false;
       let attempt: number = 1;

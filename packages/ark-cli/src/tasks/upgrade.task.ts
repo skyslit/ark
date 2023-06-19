@@ -107,7 +107,10 @@ export default (cwd_?: string, shouldUpgradeToolkit: boolean = false) => {
                 .readdirSync(tarExtractFilePath)
                 .find((d) => d.indexOf('skyslit-ark-base') > -1);
               const sourceBaseDir = path.join(tarExtractFilePath, dirName);
-              const targetDir = path.join(
+              ensureDir(sourceBaseDir, false, true);
+
+              // Copying toolkit
+              let targetDir = path.join(
                 cwd,
                 'src',
                 'modules',
@@ -115,12 +118,30 @@ export default (cwd_?: string, shouldUpgradeToolkit: boolean = false) => {
                 'toolkit'
               );
 
-              ensureDir(sourceBaseDir, false, true);
               ensureDir(targetDir, false, true);
 
               await new Promise<void>((resolve, reject) => {
                 ncp(
                   path.join(sourceBaseDir, 'src', 'modules', 'main', 'toolkit'),
+                  targetDir,
+                  (err) => {
+                    if (err) {
+                      reject(err);
+                    } else {
+                      resolve();
+                    }
+                  }
+                );
+              });
+
+              // Copying auth
+              targetDir = path.join(cwd, 'src', 'modules', 'auth');
+
+              ensureDir(targetDir, false, true);
+
+              await new Promise<void>((resolve, reject) => {
+                ncp(
+                  path.join(sourceBaseDir, 'src', 'modules', 'auth'),
                   targetDir,
                   (err) => {
                     if (err) {
@@ -175,7 +196,7 @@ export default (cwd_?: string, shouldUpgradeToolkit: boolean = false) => {
               return {
                 name: 'toolkit_confirmation',
                 message:
-                  '[Imp.] Do you want to upgrade toolkit along with the framework?',
+                  '[Imp.] Do you want to upgrade toolkit and AUTH module along with the framework?',
                 type: 'confirm',
                 default: false,
               };
@@ -206,7 +227,7 @@ export default (cwd_?: string, shouldUpgradeToolkit: boolean = false) => {
             if (shouldUpgradeToolkit === true) {
               console.log(
                 chalk.yellow(
-                  'You may need to manualy install new dependencies used in the latest version of toolkit.'
+                  'You may need to manualy install new dependencies used in the latest version of toolkit and auth module.'
                 )
               );
             }

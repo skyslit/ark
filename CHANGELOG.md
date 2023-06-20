@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.47.0](https://github.com/skyslit/ark/compare/v2.46.0...v2.47.0) (2023-06-19)
+
+
+### Features
+
+* added auth module update scripted ([6f28a36](https://github.com/skyslit/ark/commit/6f28a367391a209ee56b11237a62a7fc9a8b8433))
+
+
+
+
+
 # [2.46.0](https://github.com/skyslit/ark/compare/v2.45.1...v2.46.0) (2023-06-17)
 
 

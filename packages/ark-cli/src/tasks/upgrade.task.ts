@@ -1,61 +1,59 @@
 import Listr from 'listr';
 import inquirer from 'inquirer';
 import chalk from 'chalk';
-import runCommand from '../utils/run-command';
 import ensureDir from '../utils/ensure-dir';
 import path from 'path';
 import fs from 'fs';
 import fetch from 'node-fetch';
 import tar from 'tar-fs';
 import gunzip from 'gunzip-maybe';
-import rimraf from 'rimraf';
-import ncp from 'ncp';
+import fse from 'fs-extra';
 
 export default (cwd_?: string, shouldUpgradeToolkit: boolean = false) => {
   const packager: 'npm' | 'yarn' = 'npm';
   const cwd = cwd_ || process.cwd();
 
   const steps: Listr.ListrTask<any>[] = [
-    {
-      title: 'upgrade @skyslit/ark-core',
-      task: () =>
-        runCommand(
-          'upgrading...',
-          `${packager} update @skyslit/ark-core; exit`,
-          {
-            cwd: cwd,
-          }
-        ),
-    },
-    {
-      title: 'upgrade @skyslit/ark-backend',
-      task: () =>
-        runCommand(
-          'upgrading...',
-          `${packager} update @skyslit/ark-backend; exit`,
-          {
-            cwd: cwd,
-          }
-        ),
-    },
-    {
-      title: 'upgrade @skyslit/ark-frontend',
-      task: () =>
-        runCommand(
-          'upgrading...',
-          `${packager} update @skyslit/ark-frontend; exit`,
-          {
-            cwd: cwd,
-          }
-        ),
-    },
-    {
-      title: 'upgrade @skyslit/ark',
-      task: () =>
-        runCommand('upgrading...', `${packager} update @skyslit/ark; exit`, {
-          cwd: cwd,
-        }),
-    },
+    // {
+    //   title: 'upgrade @skyslit/ark-core',
+    //   task: () =>
+    //     runCommand(
+    //       'upgrading...',
+    //       `${packager} update @skyslit/ark-core; exit`,
+    //       {
+    //         cwd: cwd,
+    //       }
+    //     ),
+    // },
+    // {
+    //   title: 'upgrade @skyslit/ark-backend',
+    //   task: () =>
+    //     runCommand(
+    //       'upgrading...',
+    //       `${packager} update @skyslit/ark-backend; exit`,
+    //       {
+    //         cwd: cwd,
+    //       }
+    //     ),
+    // },
+    // {
+    //   title: 'upgrade @skyslit/ark-frontend',
+    //   task: () =>
+    //     runCommand(
+    //       'upgrading...',
+    //       `${packager} update @skyslit/ark-frontend; exit`,
+    //       {
+    //         cwd: cwd,
+    //       }
+    //     ),
+    // },
+    // {
+    //   title: 'upgrade @skyslit/ark',
+    //   task: () =>
+    //     runCommand('upgrading...', `${packager} update @skyslit/ark; exit`, {
+    //       cwd: cwd,
+    //     }),
+    // },
   ];
 
   if (shouldUpgradeToolkit === true) {
@@ -120,38 +118,26 @@ export default (cwd_?: string, shouldUpgradeToolkit: boolean = false) => {
 
               ensureDir(targetDir, false, true);
 
-              await new Promise<void>((resolve, reject) => {
-                ncp(
-                  path.join(sourceBaseDir, 'src', 'modules', 'main', 'toolkit'),
-                  targetDir,
-                  (err) => {
-                    if (err) {
-                      reject(err);
-                    } else {
-                      resolve();
-                    }
-                  }
-                );
-              });
+              fse.copySync(
+                path.join(sourceBaseDir, 'src', 'modules', 'main', 'toolkit'),
+                targetDir,
+                {
+                  overwrite: true,
+                }
+              );
 
               // Copying auth
               targetDir = path.join(cwd, 'src', 'modules', 'auth');
 
               ensureDir(targetDir, false, true);
 
-              await new Promise<void>((resolve, reject) => {
-                ncp(
-                  path.join(sourceBaseDir, 'src', 'modules', 'auth'),
-                  targetDir,
-                  (err) => {
-                    if (err) {
-                      reject(err);
-                    } else {
-                      resolve();
-                    }
-                  }
-                );
-              });
+              fse.copySync(
+                path.join(sourceBaseDir, 'src', 'modules', 'auth'),
+                targetDir,
+                {
+                  overwrite: true,
+                }
+              );
             },
           },
           {
@@ -159,25 +145,9 @@ export default (cwd_?: string, shouldUpgradeToolkit: boolean = false) => {
             task: async (ctx) => {
               const tarExtractFilePath = path.join(cwd, 'temp-ext');
               const tarFilePath = path.join(cwd, 'temp.tar');
-              await new Promise<void>((resolve, reject) => {
-                rimraf(tarExtractFilePath, (err) => {
-                  if (err) {
-                    reject(err);
-                  } else {
-                    resolve();
-                  }
-                });
-              });
 
-              await new Promise<void>((resolve, reject) => {
-                rimraf(tarFilePath, (err) => {
-                  if (err) {
-                    reject(err);
-                  } else {
-                    resolve();
-                  }
-                });
-              });
+              fse.removeSync(tarExtractFilePath);
+              fse.removeSync(tarFilePath);
             },
           },
         ]);

@@ -8,52 +8,53 @@ import fetch from 'node-fetch';
 import tar from 'tar-fs';
 import gunzip from 'gunzip-maybe';
 import fse from 'fs-extra';
+import runCommand from '../utils/run-command';
 
 export default (cwd_?: string, shouldUpgradeToolkit: boolean = false) => {
   const packager: 'npm' | 'yarn' = 'npm';
   const cwd = cwd_ || process.cwd();
 
   const steps: Listr.ListrTask<any>[] = [
-    // {
-    //   title: 'upgrade @skyslit/ark-core',
-    //   task: () =>
-    //     runCommand(
-    //       'upgrading...',
-    //       `${packager} update @skyslit/ark-core; exit`,
-    //       {
-    //         cwd: cwd,
-    //       }
-    //     ),
-    // },
-    // {
-    //   title: 'upgrade @skyslit/ark-backend',
-    //   task: () =>
-    //     runCommand(
-    //       'upgrading...',
-    //       `${packager} update @skyslit/ark-backend; exit`,
-    //       {
-    //         cwd: cwd,
-    //       }
-    //     ),
-    // },
-    // {
-    //   title: 'upgrade @skyslit/ark-frontend',
-    //   task: () =>
-    //     runCommand(
-    //       'upgrading...',
-    //       `${packager} update @skyslit/ark-frontend; exit`,
-    //       {
-    //         cwd: cwd,
-    //       }
-    //     ),
-    // },
-    // {
-    //   title: 'upgrade @skyslit/ark',
-    //   task: () =>
-    //     runCommand('upgrading...', `${packager} update @skyslit/ark; exit`, {
-    //       cwd: cwd,
-    //     }),
-    // },
+    {
+      title: 'upgrade @skyslit/ark-core',
+      task: () =>
+        runCommand(
+          'upgrading...',
+          `${packager} update @skyslit/ark-core; exit`,
+          {
+            cwd: cwd,
+          }
+        ),
+    },
+    {
+      title: 'upgrade @skyslit/ark-backend',
+      task: () =>
+        runCommand(
+          'upgrading...',
+          `${packager} update @skyslit/ark-backend; exit`,
+          {
+            cwd: cwd,
+          }
+        ),
+    },
+    {
+      title: 'upgrade @skyslit/ark-frontend',
+      task: () =>
+        runCommand(
+          'upgrading...',
+          `${packager} update @skyslit/ark-frontend; exit`,
+          {
+            cwd: cwd,
+          }
+        ),
+    },
+    {
+      title: 'upgrade @skyslit/ark',
+      task: () =>
+        runCommand('upgrading...', `${packager} update @skyslit/ark; exit`, {
+          cwd: cwd,
+        }),
+    },
   ];
 
   if (shouldUpgradeToolkit === true) {

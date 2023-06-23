@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.47.1](https://github.com/skyslit/ark/compare/v2.47.0...v2.47.1) (2023-06-20)
+
+
+### Bug Fixes
+
+* issue with npm update not working ([78553c6](https://github.com/skyslit/ark/commit/78553c615835f66d5ff4f79110f5eced3a8fda95))
+* issue with upgrade stuck at copying file ([5363874](https://github.com/skyslit/ark/commit/5363874041758f154e0c920146a35c07014f7af4))
+
+
+
+
+
 # [2.47.0](https://github.com/skyslit/ark/compare/v2.46.0...v2.47.0) (2023-06-19)
 
 

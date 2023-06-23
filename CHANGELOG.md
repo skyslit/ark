@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.47.2](https://github.com/skyslit/ark/compare/v2.47.1...v2.47.2) (2023-06-23)
+
+
+### Bug Fixes
+
+* issue with search ([d5f5547](https://github.com/skyslit/ark/commit/d5f55472e780b2d181aa835f84b1b61f9fa28771))
+
+
+
+
+
 ## [2.47.1](https://github.com/skyslit/ark/compare/v2.47.0...v2.47.1) (2023-06-20)
 
 

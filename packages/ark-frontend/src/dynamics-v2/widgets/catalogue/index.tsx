@@ -600,7 +600,7 @@ export const usePath: UsePathApi = (id, path, opts) => {
       setResponse(null);
 
       return controller
-        .fetch(ns, path, depth)
+        .fetch(ns, path, depth, aggregationStages)
         .then((res) => {
           setLoading(false);
           setResponse(res);

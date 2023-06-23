@@ -43,8 +43,12 @@ export class ControllerNamespace {
 
   typesArray: Array<CustomType>;
 
-  fetch(path: string): Promise<Response> {
-    return this.controller.fetch(this.name, path);
+  fetch(
+    path: string,
+    depth: number = 0,
+    aggregationStages: any[] = []
+  ): Promise<Response> {
+    return this.controller.fetch(this.name, path, depth, aggregationStages);
   }
 
   create(parentPath: string, name: string, type: string, meta: any) {
@@ -134,13 +138,19 @@ export class Controller {
     [key: string]: ControllerNamespace;
   } = {};
 
-  async fetch(ns: string, path: string, depth: number = 0): Promise<Response> {
+  async fetch(
+    ns: string,
+    path: string,
+    depth: number = 0,
+    aggregationStages: any[] = []
+  ): Promise<Response> {
     const res = await axios.post(
       '/___service/main/powerserver___fetch-content',
       {
         namespace: ns,
         path,
         depth,
+        aggregationStages,
       }
     );
 

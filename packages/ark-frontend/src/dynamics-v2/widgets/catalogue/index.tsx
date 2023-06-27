@@ -563,6 +563,7 @@ export const usePath: UsePathApi = (id, path, opts) => {
     return Object.assign({}, def, opts || {});
   }, [opts]);
 
+  const searchRequested = React.useRef<boolean>(false);
   const debounceTimerRef = React.useRef(null);
   const [aggregationStages, setAggregationStages] = React.useState<any[]>([]);
   const { use } = useArkReactServices();
@@ -616,6 +617,7 @@ export const usePath: UsePathApi = (id, path, opts) => {
 
   const search = React.useCallback(
     (aggregationStages: any[]) => {
+      searchRequested.current = true;
       setLoading(true);
       setLoaded(false);
       setResponse(null);
@@ -625,19 +627,25 @@ export const usePath: UsePathApi = (id, path, opts) => {
   );
 
   React.useEffect(() => {
-    clearTimeout(debounceTimerRef.current);
-    if (aggregationStages) {
-      debounceTimerRef.current = setTimeout(() => {
-        refresh(true, aggregationStages).then(() => setAggregationStages(null));
-      }, searchDebounceInMs);
+    if (searchRequested.current === true) {
+      searchRequested.current = false;
+      clearTimeout(debounceTimerRef.current);
+      if (aggregationStages) {
+        debounceTimerRef.current = setTimeout(() => {
+          refresh(true, aggregationStages).then(() =>
+            setAggregationStages(null)
+          );
+        }, searchDebounceInMs);
 
-      return () => {
-        clearTimeout(debounceTimerRef.current);
-      };
+        return () => {
+          clearTimeout(debounceTimerRef.current);
+        };
+      }
     }
   }, [aggregationStages, searchDebounceInMs]);
 
   const clearSearch = React.useCallback(() => {
+    searchRequested.current = true;
     clearTimeout(debounceTimerRef.current);
     setLoaded(false);
     setResponse(null);

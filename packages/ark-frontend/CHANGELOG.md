@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.47.3](https://github.com/skyslit/ark/compare/v2.47.2...v2.47.3) (2023-06-27)
+
+
+### Bug Fixes
+
+* issue with two times fetching in usePath ([1b879ae](https://github.com/skyslit/ark/commit/1b879ae31d6a3c6fb028b8f2f67c46c29dace47a))
+
+
+
+
+
 ## [2.47.2](https://github.com/skyslit/ark/compare/v2.47.1...v2.47.2) (2023-06-23)
 
 

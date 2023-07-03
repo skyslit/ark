@@ -1113,7 +1113,17 @@ export function createDynamicsV2Services(
           }
 
           try {
-            const item = await addItem(namespace, parentPath, name, type, meta);
+            const item = await addItem(
+              namespace,
+              parentPath,
+              name,
+              type,
+              meta,
+              undefined,
+              undefined,
+              undefined,
+              'supress'
+            );
             return opts.success({}, [item]);
           } catch (e) {
             return opts.error(e, 400);

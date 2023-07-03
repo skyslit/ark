@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.47.4](https://github.com/skyslit/ark/compare/v2.47.3...v2.47.4) (2023-07-03)
+
+
+### Bug Fixes
+
+* now create item will suppress error if item already exists ([6b0ef26](https://github.com/skyslit/ark/commit/6b0ef26e612328a93614137ed9c8476009676f9a))
+
+
+
+
+
 ## [2.47.3](https://github.com/skyslit/ark/compare/v2.47.2...v2.47.3) (2023-06-27)
 
 

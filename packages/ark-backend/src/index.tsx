@@ -304,7 +304,9 @@ type ArkVolumeOptions = {
 
 export interface IArkVolume {
   put: (path: string, data: NodeJS.ArrayBufferView) => Promise<any>;
-  get: (path: string) => NodeJS.ArrayBufferView;
+  get: (
+    path: string
+  ) => NodeJS.ArrayBufferView | Promise<NodeJS.ArrayBufferView>;
   rename: (oldPath: string, newPath: string) => Promise<any>;
   delete: (path: string) => Promise<any>;
   getDownloadHandler: () => Array<Handler>;

@@ -7,7 +7,7 @@
   "scripts": {
     "test": "jest",
     "start": "jest --watchAll",
-    "build": "../../node_modules/.bin/tsc",
+    "build": "tsc",
     "launch": "node ./build/index.js"
   },
   "bin": {

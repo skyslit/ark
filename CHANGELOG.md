@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.47.5](https://github.com/skyslit/ark/compare/v2.47.4...v2.47.5) (2023-09-19)
+
+
+### Bug Fixes
+
+* issue with RT ([b68a250](https://github.com/skyslit/ark/commit/b68a2505226768364e31ae210e02f2c8cc488557))
+
+
+
+
+
 ## [2.47.4](https://github.com/skyslit/ark/compare/v2.47.3...v2.47.4) (2023-07-03)
 
 

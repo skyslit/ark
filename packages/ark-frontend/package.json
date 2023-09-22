@@ -1,6 +1,6 @@
 {
   "name": "@skyslit/ark-frontend",
-  "version": "2.47.6",
+  "version": "2.47.7",
   "description": "A business framework for building react based frontend application",
   "main": "./build/index.js",
   "private": false,

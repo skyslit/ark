@@ -3,6 +3,18 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.47.7](https://github.com/skyslit/ark/compare/v2.47.6...v2.47.7) (2023-09-22)
+
+
+### Bug Fixes
+
+* added suppress option in shortcut ([aa5c82e](https://github.com/skyslit/ark/commit/aa5c82e63fed1de8b8a0714b23a7cfd23e4d2054))
+* issue with redis version ([b056fbe](https://github.com/skyslit/ark/commit/b056fbe03923b9380562eef8606d93290333c69b))
+
+
+
+
+
 ## [2.47.6](https://github.com/skyslit/ark/compare/v2.47.5...v2.47.6) (2023-09-22)
 
 **Note:** Version bump only for package @skyslit/ark-backend

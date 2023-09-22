@@ -729,11 +729,12 @@ const useSocketCreator: (
         );
 
         const joinRoom = React.useCallback(() => {
+          let socket: Socket<any, any> = ctx.getData(
+            'default',
+            SOCKET_STORAGE_KEY
+          );
+
           if (hasRoomJoined === false) {
-            let socket: Socket<any, any> = ctx.getData(
-              'default',
-              SOCKET_STORAGE_KEY
-            );
             if (socket) {
               socket.emit('ark/rooms/join', roomInfo);
               socketLog(
@@ -741,6 +742,9 @@ const useSocketCreator: (
               );
               setHasRoomJoined(true);
             }
+          } else {
+            socket.emit('ark/rooms/join', roomInfo);
+            socketLog(`RT: Client joined rooms ${roomInfo.roomIds.join(', ')}`);
           }
         }, [roomInfo, hasRoomJoined]);
 

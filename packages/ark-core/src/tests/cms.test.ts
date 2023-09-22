@@ -210,6 +210,46 @@ describe('cms functions', () => {
     expect(result2.content.message).toStrictEqual('Hola there');
   });
 
+  test('basic usage of applyLog for non existant key root level', () => {
+    let doc: any = {
+      items: [
+        {
+          id: '1',
+          title: 'hello',
+        },
+      ],
+    };
+
+    expect(doc.mainTitle).toBeFalsy();
+
+    doc = CMS.applyLog(doc, 'mainTitle', 'Test desc updated', 'edit', null);
+
+    expect(doc.mainTitle).toStrictEqual('Test desc updated');
+  });
+
+  test('basic usage of applyLog for non existant key inside array', () => {
+    let doc: any = {
+      items: [
+        {
+          id: '1',
+          title: 'hello',
+        },
+      ],
+    };
+
+    expect(doc.items[0].desc).toBeFalsy();
+
+    doc = CMS.applyLog(
+      doc,
+      'items.[1].desc',
+      'Test desc updated',
+      'edit',
+      null
+    );
+
+    expect(doc.items[0].desc).toStrictEqual('Test desc updated');
+  });
+
   test('basic usage of applyLog', () => {
     let doc = {
       title: 'Test title',

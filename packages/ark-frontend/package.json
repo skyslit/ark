@@ -1,6 +1,6 @@
 {
   "name": "@skyslit/ark-frontend",
-  "version": "2.47.3",
+  "version": "2.47.6",
   "description": "A business framework for building react based frontend application",
   "main": "./build/index.js",
   "private": false,
@@ -24,7 +24,7 @@
     "@babel/preset-env": "^7.12.1",
     "@babel/preset-react": "^7.12.7",
     "@babel/preset-typescript": "^7.12.1",
-    "@skyslit/ark-core": "^2.38.0",
+    "@skyslit/ark-core": "^2.47.6",
     "@testing-library/react": "^11.2.2",
     "@types/jest": "^26.0.15",
     "@types/lodash": "^4.14.168",

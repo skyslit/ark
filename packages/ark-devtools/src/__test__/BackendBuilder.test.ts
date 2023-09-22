@@ -77,7 +77,7 @@ describe('backend builder', () => {
 
       builderInstance.build(
         {
-          mode: 'production',
+          mode: 'development',
           cwd: testProjectDir,
         },
         fs,

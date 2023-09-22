@@ -816,7 +816,9 @@ const useSocketCreator: (
               };
 
               socket.on('connect', connectionHandler);
-              return () => socket.off('connect', connectionHandler);
+              return () => {
+                socket.off('connect', connectionHandler)
+              };
             }
           }
         }, [hasRoomJoined, joinRoom, roomInfo]);
@@ -1199,7 +1201,7 @@ const mapRouteCreator = (
     []
   );
   routeConfigs.push({
-    path,
+    path: path as any,
     component: Layout
       ? (props: any) => (
           <Layout {...props}>

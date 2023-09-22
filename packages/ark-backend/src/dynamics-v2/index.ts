@@ -125,7 +125,8 @@ export type FolderOperationsApi = {
     namespace: string,
     sourcePath: string,
     destinationPath: string,
-    itemName: string
+    itemName: string,
+    alreadyExistsErrorHandleStrategy?: 'throw' | 'supress' | 'resolve',
   ) => Promise<Item>;
   updateItemMeta: (namespace: string, path: string, meta: any) => Promise<any>;
   updateItemSecurity: (
@@ -632,7 +633,8 @@ export function createDynamicsV2Services(
       namespace: string,
       sourcePath: string,
       destinationPath: string,
-      itemName: string
+      itemName: string,
+      alreadyExistsErrorHandleStrategy = undefined
     ) => {
       const sourceItem = (await PowerWidgetNavItems.findOne({
         namespace,
@@ -652,7 +654,8 @@ export function createDynamicsV2Services(
         sourceItem.meta,
         undefined,
         true,
-        sourceItem.path
+        sourceItem.path,
+        alreadyExistsErrorHandleStrategy
       );
     };
 
@@ -1141,6 +1144,7 @@ export function createDynamicsV2Services(
             sourcePath: Joi.string(),
             destinationPath: Joi.string(),
             itemName: Joi.string(),
+            alreadyExistsErrorHandleStrategy: Joi.optional().allow('')
           })
         );
 
@@ -1150,6 +1154,7 @@ export function createDynamicsV2Services(
             sourcePath,
             destinationPath,
             itemName,
+            alreadyExistsErrorHandleStrategy
           } = opts.args.input;
 
           const permissionResult = await getItemPermission(
@@ -1168,7 +1173,8 @@ export function createDynamicsV2Services(
               namespace,
               sourcePath,
               destinationPath,
-              itemName
+              itemName,
+              alreadyExistsErrorHandleStrategy || undefined
             );
             return opts.success({}, [item]);
           } catch (e) {

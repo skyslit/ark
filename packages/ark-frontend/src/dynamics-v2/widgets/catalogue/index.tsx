@@ -447,7 +447,8 @@ export type FolderIntegrationApi = {
     sourcePath: string,
     destinationPath: string,
     itemName: string,
-    ns?: string
+    ns?: string,
+    alreadyExistsErrorHandleStrategy?: 'throw' | 'supress' | 'resolve'
   ) => Promise<any>;
   update: (path: string, meta: any, security: any, ns?: string) => Promise<any>;
   rename: (
@@ -471,12 +472,13 @@ export function createFolderApis(
       createItem: (parentPath, name, type, meta, ns = 'default') => {
         return controller.create(ns, parentPath, name, type, meta);
       },
-      createShortcut(sourcePath, destinationPath, itemName, ns = 'default') {
+      createShortcut(sourcePath, destinationPath, itemName, ns = 'default', alreadyExistsErrorHandleStrategy = undefined) {
         return controller.createShortcut(
           ns,
           sourcePath,
           destinationPath,
-          itemName
+          itemName,
+          alreadyExistsErrorHandleStrategy
         );
       },
       update: (path, meta, security, ns = 'default') => {

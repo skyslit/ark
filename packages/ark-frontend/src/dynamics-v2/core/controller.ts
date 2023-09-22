@@ -161,7 +161,8 @@ export class Controller {
     ns: string,
     sourcePath: string,
     destinationPath: string,
-    itemName: string
+    itemName: string,
+    alreadyExistsErrorHandleStrategy?: 'throw' | 'supress' | 'resolve'
   ) {
     const res = await axios.post(
       '/___service/main/powerserver___add-shortcut',
@@ -170,6 +171,7 @@ export class Controller {
         sourcePath,
         destinationPath,
         itemName,
+        alreadyExistsErrorHandleStrategy
       }
     );
 

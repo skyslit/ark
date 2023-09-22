@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.47.6](https://github.com/skyslit/ark/compare/v2.47.5...v2.47.6) (2023-09-22)
+
+
+### Bug Fixes
+
+* issue with useContent not setting value for new keys ([3522d25](https://github.com/skyslit/ark/commit/3522d25b9dbaa81705940a00945e190e0a8249ca))
+
+
+
+
+
 # [2.38.0](https://github.com/skyslit/ark/compare/v2.37.2...v2.38.0) (2023-05-28)
 
 ### Features

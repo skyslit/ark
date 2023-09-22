@@ -1,6 +1,6 @@
 {
   "name": "@skyslit/ark-core",
-  "version": "2.38.0",
+  "version": "2.47.6",
   "description": "A pointer based library used for building Ark based applications",
   "main": "./build/index.js",
   "private": false,

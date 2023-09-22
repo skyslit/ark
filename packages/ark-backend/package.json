@@ -71,7 +71,7 @@
     "morgan": "^1.10.0",
     "node-html-parser": "^2.0.0",
     "path-to-regexp": "^6.2.0",
-    "redis": "^4.5.1",
+    "redis": "4.5.1",
     "socket.io": "^4.5.4",
     "supertest": "^6.0.1"
   },

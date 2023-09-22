@@ -935,6 +935,7 @@ export function applyLog(
   const resolvedKey = resolveAddressForTraversal(traverseResult, key);
   const paths = traverseResult.paths().filter((p) => p.length > 0);
   let i = 0;
+  let hasValueSet: boolean = false;
   for (i = 0; i < paths.length; i++) {
     const address = resolveTraversalAddressFromPath(paths[i]);
     if (address === resolvedKey) {
@@ -943,7 +944,15 @@ export function applyLog(
         track(currentVal, typeof currentVal);
       }
       traverseResult.set(paths[i], val);
+      hasValueSet = true;
       break;
+    }
+  }
+
+  if (hasValueSet === false) {
+    if (Boolean(resolvedKey)) {
+      /** Creating a new key */
+      traverseResult.set(String(resolvedKey).split('.'), val);
     }
   }
 

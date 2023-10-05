@@ -1,6 +1,6 @@
 {
   "name": "@skyslit/ark-frontend",
-  "version": "2.47.6",
+  "version": "2.47.7",
   "description": "A business framework for building react based frontend application",
   "main": "./build/index.js",
   "private": false,
@@ -50,7 +50,7 @@
   "dependencies": {
     "lodash": "^4.17.21",
     "path-to-regexp": "^6.2.1",
-    "redux": "^4.0.5",
+    "redux": "4.0.5",
     "socket.io-client": "^4.5.4",
     "traverse": "^0.6.6"
   },

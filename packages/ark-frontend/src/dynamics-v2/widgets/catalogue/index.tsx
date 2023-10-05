@@ -635,7 +635,7 @@ export const usePath: UsePathApi = (id, path, opts) => {
       if (aggregationStages) {
         debounceTimerRef.current = setTimeout(() => {
           refresh(true, aggregationStages).then(() =>
-            setAggregationStages(null)
+            setAggregationStages([])
           );
         }, searchDebounceInMs);
 
@@ -651,8 +651,9 @@ export const usePath: UsePathApi = (id, path, opts) => {
     clearTimeout(debounceTimerRef.current);
     setLoaded(false);
     setResponse(null);
-    setAggregationStages(null);
-  }, []);
+    setAggregationStages([]);
+    return refresh(true, []);
+  }, [refresh]);
 
   return {
     loaded,
@@ -763,9 +764,8 @@ export function generateFileLink(
   mode: 'stream' | 'download' = 'stream',
   namespace: string = 'default'
 ) {
-  return `/___service/main/powerserver___stream-file?namespace=${namespace}&filePath=${filePath}&attachment=${
-    mode === 'download' ? 'true' : 'false'
-  }`;
+  return `/___service/main/powerserver___stream-file?namespace=${namespace}&filePath=${filePath}&attachment=${mode === 'download' ? 'true' : 'false'
+    }`;
 }
 
 /* -------------------------------------------------------------------------- */

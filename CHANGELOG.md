@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.47.8](https://github.com/skyslit/ark/compare/v2.47.7...v2.47.8) (2023-10-05)
+
+
+### Bug Fixes
+
+* bug fix in clearsearch ([a3128db](https://github.com/skyslit/ark/commit/a3128db38b27015357cfada8f6ba139868d8b331))
+
+
+
+
+
 ## [2.47.7](https://github.com/skyslit/ark/compare/v2.47.6...v2.47.7) (2023-09-22)
 
 

@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.47.8](https://github.com/skyslit/ark/compare/v2.47.7...v2.47.8) (2023-10-05)
+
+**Note:** Version bump only for package @skyslit/ark-devtools
+
+
+
+
+
 ## [2.47.7](https://github.com/skyslit/ark/compare/v2.47.6...v2.47.7) (2023-09-22)
 
 

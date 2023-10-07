@@ -597,7 +597,6 @@ export const usePath: UsePathApi = (id, path, opts) => {
       if (loaded === true && force === false) {
         return;
       }
-
       setLoaded(false);
       setLoading(true);
       setResponse(null);
@@ -634,8 +633,9 @@ export const usePath: UsePathApi = (id, path, opts) => {
       clearTimeout(debounceTimerRef.current);
       if (aggregationStages) {
         debounceTimerRef.current = setTimeout(() => {
-          refresh(true, aggregationStages).then(() =>
+          refresh(true, aggregationStages).then(() => {
             setAggregationStages([])
+          }
           );
         }, searchDebounceInMs);
 
@@ -652,7 +652,6 @@ export const usePath: UsePathApi = (id, path, opts) => {
     setLoaded(false);
     setResponse(null);
     setAggregationStages([]);
-    return refresh(true, []);
   }, [refresh]);
 
   return {

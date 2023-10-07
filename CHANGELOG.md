@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.47.9](https://github.com/skyslit/ark/compare/v2.47.8...v2.47.9) (2023-10-07)
+
+
+### Bug Fixes
+
+* solved flicker while clearSerach ([6de0304](https://github.com/skyslit/ark/commit/6de03049f255f6706d6d9beace74bf34405f7f33))
+
+
+
+
+
 ## [2.47.8](https://github.com/skyslit/ark/compare/v2.47.7...v2.47.8) (2023-10-05)
 
 

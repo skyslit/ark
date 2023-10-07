@@ -3,6 +3,14 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.47.9](https://github.com/skyslit/ark/compare/v2.47.8...v2.47.9) (2023-10-07)
+
+**Note:** Version bump only for package @skyslit/ark-backend
+
+
+
+
+
 ## [2.47.8](https://github.com/skyslit/ark/compare/v2.47.7...v2.47.8) (2023-10-05)
 
 **Note:** Version bump only for package @skyslit/ark-backend

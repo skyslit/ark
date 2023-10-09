@@ -1,6 +1,6 @@
 {
   "name": "@skyslit/ark-backend",
-  "version": "2.47.9",
+  "version": "2.48.0",
   "description": "A business framework for building Ark based event driven backend application",
   "main": "./build/index.js",
   "private": false,

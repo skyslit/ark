@@ -3293,3 +3293,164 @@ export function getPassThroughPayload() {
     };
   }, {});
 }
+
+/* -------------------------------------------------------------------------- */
+/*                                Communication                               */
+/* -------------------------------------------------------------------------- */
+
+type EmailAddress = {
+  email: string;
+  name?: string;
+};
+
+type Envelop = {
+  fromAddress?: EmailAddress;
+  toAddresses: EmailAddress[];
+  subject: string;
+  htmlContent?: string;
+  htmlTemplate?: string;
+  textContent?: string;
+  textTemplate?: string;
+  data?: any;
+  attempt?: number;
+};
+
+type EmailReceipt = {
+  envelop: Envelop;
+  vendorAck: any;
+  error?: any;
+  _id?: any;
+};
+
+export type IEmailProvider = {
+  sendEmail: (envelop: Envelop) => Promise<EmailReceipt>;
+  render: (template: string, data: any) => Promise<string>;
+};
+
+type CommunicationPointers = {
+  sendEmail: (envelop: Envelop, providerId?: string) => Promise<EmailReceipt>;
+  useProvider: (provider: IEmailProvider, refId?: string) => IEmailProvider;
+};
+
+export const Communication = createPointer<CommunicationPointers>(
+  (moduleId, controller, context) => ({
+    init() {
+      /**
+       * Import db connection
+       */
+      const mongooseConnection: Connection = context.getData(
+        'default',
+        `db/default`,
+        null
+      );
+
+      if (mongooseConnection) {
+        const EmailReceipts = mongooseConnection.model<Document>(
+          '__communication_email_receipts',
+          new Schema(
+            {
+              envelop: {
+                type: Object,
+                required: false,
+                default: null,
+              },
+              vendorAck: {
+                type: Object,
+                required: false,
+                default: null,
+              },
+              error: {
+                type: String,
+                required: false,
+                default: null,
+              },
+            },
+            {
+              timestamps: {
+                createdAt: 'createdAt',
+                updatedAt: 'updatedAt',
+              },
+            }
+          )
+        );
+      }
+    },
+    sendEmail: async (envelop, providerId) => {
+      if (!providerId) {
+        providerId = 'default';
+      }
+
+      const provider = context.useDataFromContext<IEmailProvider>(
+        moduleId,
+        providerId,
+        undefined,
+        false,
+        'email-provider'
+      );
+
+      if (!provider) {
+        throw new Error(
+          `Email provider '${providerId}' does not exists in module '${moduleId}'`
+        );
+      }
+
+      let reciept: EmailReceipt = null;
+
+      try {
+        /** Prepare data */
+        if (envelop.htmlTemplate) {
+          envelop.htmlContent = await provider.render(
+            envelop.htmlTemplate,
+            envelop.data
+          );
+        }
+
+        if (envelop.textTemplate) {
+          envelop.textContent = await provider.render(
+            envelop.textTemplate,
+            envelop.data
+          );
+        }
+
+        reciept = await provider.sendEmail(envelop);
+      } catch (e) {
+        reciept = {
+          envelop,
+          vendorAck: null,
+          error: e?.message || 'Unknown error',
+        };
+      }
+
+      if (reciept) {
+        const mongooseConnection: Connection = context.getData(
+          'default',
+          `db/default`,
+          null
+        );
+
+        if (mongooseConnection) {
+          const EmailReceipts = mongooseConnection.model<Document>(
+            '__communication_email_receipts'
+          );
+          const rc = new EmailReceipts(reciept);
+          await rc.save();
+        }
+      }
+
+      return reciept;
+    },
+    useProvider(provider, refId) {
+      if (!refId) {
+        refId = 'default';
+      }
+
+      return context.useDataFromContext(
+        moduleId,
+        refId,
+        provider,
+        false,
+        'email-provider'
+      );
+    },
+  })
+);

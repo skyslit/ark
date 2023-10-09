@@ -22,7 +22,11 @@ describe('communication', () => {
 
       context
         .activate(async ({ use }) => {
-          const { sendEmail, useProvider } = use(Communication);
+          const { sendEmail, useProvider, enableCommunication } = use(
+            Communication
+          );
+
+          enableCommunication();
 
           const aravindsMailbox: any = [];
 
@@ -85,10 +89,12 @@ describe('communication', () => {
 
       context
         .activate(async ({ use, run }) => {
-          const { useProvider } = use(Communication);
+          const { useProvider, enableCommunication } = use(Communication);
           const { useDatabase } = use(Data);
 
           useDatabase('default', testDbConnectionString);
+
+          enableCommunication();
 
           const aravindsMailbox: any = [];
 
@@ -153,6 +159,25 @@ describe('communication', () => {
             expect(receiptsInDb.length).toStrictEqual(1);
             expect(receiptsInDb[0]._id).toBeTruthy();
             expect(receiptsInDb[0].vendorAck?.ack).toStrictEqual(true);
+
+            await sendEmail({
+              subject: 'Test email',
+              toAddresses: [
+                {
+                  name: 'Aravind',
+                  email: 'aravind@skyslit.com',
+                },
+              ],
+              fromAddress: {
+                email: 'no-reply@skyslit.com',
+                name: 'Skyslit Support',
+              },
+              htmlTemplate: `<h1>{template}</h1>`,
+              textContent: 'Hello Aravind',
+              data: {
+                greetings: `<h1>Hello Aravind</h1>`,
+              },
+            });
           });
         })
         .then(async () => {

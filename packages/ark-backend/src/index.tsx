@@ -3328,52 +3328,55 @@ export type IEmailProvider = {
 };
 
 type CommunicationPointers = {
+  enableCommunication: () => void;
   sendEmail: (envelop: Envelop, providerId?: string) => Promise<EmailReceipt>;
   useProvider: (provider: IEmailProvider, refId?: string) => IEmailProvider;
 };
 
 export const Communication = createPointer<CommunicationPointers>(
   (moduleId, controller, context) => ({
-    init() {
-      /**
-       * Import db connection
-       */
-      const mongooseConnection: Connection = context.getData(
-        'default',
-        `db/default`,
-        null
-      );
-
-      if (mongooseConnection) {
-        const EmailReceipts = mongooseConnection.model<Document>(
-          '__communication_email_receipts',
-          new Schema(
-            {
-              envelop: {
-                type: Object,
-                required: false,
-                default: null,
-              },
-              vendorAck: {
-                type: Object,
-                required: false,
-                default: null,
-              },
-              error: {
-                type: String,
-                required: false,
-                default: null,
-              },
-            },
-            {
-              timestamps: {
-                createdAt: 'createdAt',
-                updatedAt: 'updatedAt',
-              },
-            }
-          )
+    enableCommunication() {
+      controller.run(() => {
+        /**
+         * Import db connection
+         */
+        const mongooseConnection: Connection = context.getData(
+          'default',
+          `db/default`,
+          null
         );
-      }
+
+        if (mongooseConnection) {
+          const EmailReceipts = mongooseConnection.model<Document>(
+            '__communication_email_receipts',
+            new Schema(
+              {
+                envelop: {
+                  type: Object,
+                  required: false,
+                  default: null,
+                },
+                vendorAck: {
+                  type: Object,
+                  required: false,
+                  default: null,
+                },
+                error: {
+                  type: String,
+                  required: false,
+                  default: null,
+                },
+              },
+              {
+                timestamps: {
+                  createdAt: 'createdAt',
+                  updatedAt: 'updatedAt',
+                },
+              }
+            )
+          );
+        }
+      });
     },
     sendEmail: async (envelop, providerId) => {
       if (!providerId) {

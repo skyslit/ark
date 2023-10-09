@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.48.1](https://github.com/skyslit/ark/compare/v2.48.0...v2.48.1) (2023-10-09)
+
+
+### Bug Fixes
+
+* added communication in ark-backend ([f7d224b](https://github.com/skyslit/ark/commit/f7d224b431161a3a727dc887ab518f390273a8b7))
+
+
+
+
+
 # [2.48.0](https://github.com/skyslit/ark/compare/v2.47.9...v2.48.0) (2023-10-09)
 
 

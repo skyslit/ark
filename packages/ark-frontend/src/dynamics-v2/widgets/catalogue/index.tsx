@@ -599,7 +599,7 @@ export const usePath: UsePathApi = (id, path, opts) => {
       }
       setLoaded(false);
       setLoading(true);
-      setResponse(null);
+      // setResponse(null);
 
       return controller
         .fetch(ns, path, depth, aggregationStages)
@@ -621,7 +621,7 @@ export const usePath: UsePathApi = (id, path, opts) => {
       searchRequested.current = true;
       setLoading(true);
       setLoaded(false);
-      setResponse(null);
+      // setResponse(null);
       setAggregationStages(aggregationStages);
     },
     [refresh]
@@ -650,7 +650,7 @@ export const usePath: UsePathApi = (id, path, opts) => {
     searchRequested.current = true;
     clearTimeout(debounceTimerRef.current);
     setLoaded(false);
-    setResponse(null);
+    // setResponse(null);
     setAggregationStages([]);
   }, [refresh]);
 

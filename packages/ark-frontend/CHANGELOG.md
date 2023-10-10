@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.48.2](https://github.com/skyslit/ark/compare/v2.48.1...v2.48.2) (2023-10-10)
+
+
+### Bug Fixes
+
+* fixed response becoming null when search ([964555e](https://github.com/skyslit/ark/commit/964555e435cbf540f642f19102c91d85db42e217))
+
+
+
+
+
 ## [2.47.9](https://github.com/skyslit/ark/compare/v2.47.8...v2.47.9) (2023-10-07)
 
 

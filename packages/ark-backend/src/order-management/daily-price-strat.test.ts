@@ -72,7 +72,7 @@ test('should generate invoice for a new order (i.e. without expiry date)', async
     },
   };
 
-  orderController.invoices = {
+  orderController.vouchers = {
     async issueInvoice(val) {
       val._id = 'inv-1001';
       invoices.push(val);
@@ -172,7 +172,7 @@ test('should generate invoice for a existing order with expiry date', async () =
     },
   };
 
-  orderController.invoices = {
+  orderController.vouchers = {
     async issueInvoice(val) {
       val._id = 'inv-1001';
       invoices.push(val);

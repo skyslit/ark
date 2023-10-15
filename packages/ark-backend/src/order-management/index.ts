@@ -1,6 +1,6 @@
 import moment from 'moment';
 
-export type InvoiceItem = {
+export type VoucherItem = {
   orderId: string;
   productId: string;
   notes: string;
@@ -8,15 +8,25 @@ export type InvoiceItem = {
   unitPrice: number;
   netAmount: number;
   timeUnit: number;
+  quantity: number;
 };
 
 export type Invoice = {
   _id?: any;
   timeInUtc: number;
   accountId: string;
-  items: InvoiceItem[];
+  items: VoucherItem[];
   currency: string;
   appliedCoupons?: any[];
+  netAmount: number;
+};
+
+export type CreditNote = {
+  _id?: any;
+  timeInUtc: number;
+  accountId: string;
+  items: VoucherItem[];
+  currency: string;
   netAmount: number;
 };
 
@@ -67,9 +77,11 @@ export type Order = {
   lastCreditNoteInUtc?: number;
 };
 
-export interface IInvoiceRepo {
+export interface IVoucherRepo {
   issueInvoice: (val: Invoice) => Promise<Invoice>;
+  issueCreditNote: (val: CreditNote) => Promise<CreditNote>;
 }
+
 export interface IProductRepo {}
 export interface IOrderRepo {
   fetchOrderById: (accountId: string, orderId: string) => Promise<Order[]>;
@@ -82,12 +94,15 @@ export type InvoiceGeneratorOptions = {
   orderId?: string;
 };
 
+export type Voucher = 'invoice' | 'adj-invoice' | 'credit-note';
+
 export class OrderController {
   products: IProductRepo;
   orders: IOrderRepo;
-  invoices: IInvoiceRepo;
+  vouchers: IVoucherRepo;
 
   async calculatePriceForRecurringOrder(
+    voucher: Voucher,
     order: Partial<Order>,
     timeInUtc: moment.Moment
   ): Promise<{
@@ -113,35 +128,47 @@ export class OrderController {
     let subscriptionStartTime = timeInUtc.clone();
     let subscriptionEndTime: moment.Moment;
 
-    switch (billingClass) {
-      case 'monthly': {
-        subscriptionEndTime = subscriptionStartTime.clone().add(1, 'month');
-        break;
+    if (voucher === 'invoice') {
+      switch (billingClass) {
+        case 'monthly': {
+          subscriptionEndTime = subscriptionStartTime.clone().add(1, 'month');
+          break;
+        }
+        case 'quarterly': {
+          subscriptionEndTime = subscriptionStartTime.clone().add(3, 'month');
+          break;
+        }
+        case 'yearly': {
+          subscriptionEndTime = subscriptionStartTime.clone().add(1, 'year');
+          break;
+        }
+        default: {
+          throw new Error(`Billing class ${billingClass} not supported`);
+        }
       }
-      case 'quarterly': {
-        subscriptionEndTime = subscriptionStartTime.clone().add(3, 'month');
-        break;
-      }
-      case 'yearly': {
-        subscriptionEndTime = subscriptionStartTime.clone().add(1, 'year');
-        break;
-      }
-      default: {
-        throw new Error(`Billing class ${billingClass} not supported`);
-      }
-    }
 
-    /** Adjust order if subscription is already running */
-    if (expiryDateInUtc > -1) {
-      const expiryM = moment.utc(expiryDateInUtc);
-      const hasAlreadyExpired = expiryM.isBefore(timeInUtc, 'minute');
-      if (hasAlreadyExpired === false) {
-        subscriptionStartTime = expiryM.clone();
+      /** Adjust order if subscription is already running */
+      if (expiryDateInUtc > -1) {
+        const expiryM = moment.utc(expiryDateInUtc);
+        const hasAlreadyExpired = expiryM.isBefore(timeInUtc, 'minute');
+        if (hasAlreadyExpired === false) {
+          subscriptionStartTime = expiryM.clone();
+        }
       }
+    } else {
+      subscriptionEndTime = moment.utc(expiryDateInUtc);
     }
 
     let timeUnit: number = -1;
     let notes: string = '';
+
+    const noteData = {
+      intendLabel: 'usage',
+    };
+
+    if (voucher === 'credit-note') {
+      noteData.intendLabel = 'refund';
+    }
 
     switch (priceCalculationStrategy) {
       case 'hourly': {
@@ -150,7 +177,9 @@ export class OrderController {
           'hours',
           false
         );
-        notes = `For usage of product '${productId} x${quantity}' from ${subscriptionStartTime.format(
+        notes = `For ${
+          noteData.intendLabel
+        } of product '${productId} x${quantity}' from ${subscriptionStartTime.format(
           'lll'
         )} to ${subscriptionEndTime.format(
           'lll'
@@ -163,7 +192,9 @@ export class OrderController {
           'days',
           false
         );
-        notes = `For usage of product '${productId} x${quantity}' from ${subscriptionStartTime.format(
+        notes = `For ${
+          noteData.intendLabel
+        } of product '${productId} x${quantity}' from ${subscriptionStartTime.format(
           'lll'
         )} to ${subscriptionEndTime.format(
           'lll'
@@ -171,12 +202,26 @@ export class OrderController {
         break;
       }
       case 'monthly': {
+        let diffPrecision = false;
+
+        /** Required to calculate differential refund */
+        if (voucher === 'credit-note' || voucher === 'adj-invoice') {
+          diffPrecision = true;
+        }
+
         timeUnit = subscriptionEndTime.diff(
           subscriptionStartTime,
           'months',
-          false
+          diffPrecision
         );
-        notes = `For usage of product '${productId} x${quantity}' from ${subscriptionStartTime.format(
+
+        if ((diffPrecision = true)) {
+          timeUnit = Number(timeUnit.toFixed(1));
+        }
+
+        notes = `For ${
+          noteData.intendLabel
+        } of product '${productId} x${quantity}' from ${subscriptionStartTime.format(
           'lll'
         )} to ${subscriptionEndTime.format(
           'lll'
@@ -200,10 +245,11 @@ export class OrderController {
     };
   }
 
-  async calculateInvoiceItem(
-    order: Order,
+  async calculateItem(
+    voucher: Voucher,
+    order: Partial<Order>,
     timeInUtc: moment.Moment
-  ): Promise<InvoiceItem> {
+  ): Promise<VoucherItem> {
     switch (order.type) {
       case 'one-time': {
         if (order.status !== 'pending') {
@@ -218,10 +264,12 @@ export class OrderController {
           notes: `One time payment charged for quantity x${order.quantity} nos.`,
           netAmount: order.unitPrice * order.quantity,
           timeUnit: -1,
+          quantity: order.quantity,
         };
       }
       case 'recurring': {
         const result = await this.calculatePriceForRecurringOrder(
+          voucher,
           order,
           timeInUtc
         );
@@ -230,6 +278,7 @@ export class OrderController {
           productId: order.productId,
           unitRate: order.unitRate,
           unitPrice: order.unitPrice,
+          quantity: order.quantity,
           ...result,
         };
       }
@@ -271,7 +320,7 @@ export class OrderController {
         throw new Error(`All items in the order must be of same currency`);
       }
 
-      const item = await this.calculateInvoiceItem(order, timeInUtc);
+      const item = await this.calculateItem('invoice', order, timeInUtc);
       const { subscriptionEndTime, ...rest } = item as any;
       const { timeUnit } = rest;
 
@@ -295,7 +344,7 @@ export class OrderController {
     }, 0);
 
     if (invoice.items.length > 0) {
-      await this.invoices.issueInvoice(invoice);
+      await this.vouchers.issueInvoice(invoice);
     }
 
     return invoice;
@@ -319,6 +368,14 @@ export class OrderController {
       lastCreditNoteInUtc = -1;
     }
 
+    const creditNote: CreditNote = {
+      timeInUtc: timeInUtc.valueOf(),
+      accountId,
+      currency: orders[0].currencyCode,
+      items: [],
+      netAmount: 0,
+    };
+
     for (const log of changeLogs) {
       const hasNotIssuedACreditNote = lastCreditNoteInUtc < 0;
       const changeHappenedAfterLastInvoice = moment
@@ -331,9 +388,95 @@ export class OrderController {
         if (log.field === 'quantity') {
           const diff = log.oldValue - log.value;
           if (diff > 0) {
+            const item = await this.calculateItem(
+              'credit-note',
+              { ...order, quantity: diff },
+              moment.utc(log.dateInUtc)
+            );
+            const { subscriptionEndTime, ...rest } = item as any;
+            creditNote.items.push(rest);
           }
         }
       }
     }
+
+    creditNote.netAmount = creditNote.items.reduce((acc, item) => {
+      return acc + item.netAmount;
+    }, 0);
+
+    if (creditNote.items.length > 0) {
+      await this.orders.updateOrderById(order._id, {
+        lastCreditNoteInUtc: timeInUtc.valueOf(),
+      });
+
+      await this.vouchers.issueCreditNote(creditNote);
+    }
+
+    return creditNote;
+  }
+
+  async generateAdjustmentInvoice(
+    accountId: string,
+    orderId: string,
+    timeInUtc: moment.Moment
+  ) {
+    const orders = await this.orders.fetchOrderById(accountId, orderId);
+
+    if (orders?.length < 1) {
+      throw new Error(`Account ID ${accountId} has no orders to process`);
+    }
+
+    const order = orders[0];
+    let { lastInvoiceInUtc, changeLogs } = order;
+
+    if (isNaN(lastInvoiceInUtc)) {
+      lastInvoiceInUtc = -1;
+    }
+
+    const invoice: Invoice = {
+      timeInUtc: timeInUtc.valueOf(),
+      accountId,
+      currency: orders[0].currencyCode,
+      items: [],
+      netAmount: 0,
+    };
+
+    for (const log of changeLogs) {
+      const hasNotIssuedACreditNote = lastInvoiceInUtc < 0;
+      const changeHappenedAfterLastInvoice = moment
+        .utc(lastInvoiceInUtc)
+        .isSameOrBefore(moment.utc(log.dateInUtc), 'minute');
+      if (
+        hasNotIssuedACreditNote === true ||
+        changeHappenedAfterLastInvoice === true
+      ) {
+        if (log.field === 'quantity') {
+          const diff = log.value - log.oldValue;
+          if (diff > 0) {
+            const item = await this.calculateItem(
+              'adj-invoice',
+              { ...order, quantity: diff },
+              moment.utc(log.dateInUtc)
+            );
+            const { subscriptionEndTime, ...rest } = item as any;
+            invoice.items.push(rest);
+          }
+        }
+      }
+    }
+
+    invoice.netAmount = invoice.items.reduce((acc, item) => {
+      return acc + item.netAmount;
+    }, 0);
+
+    if (invoice.items.length > 0) {
+      await this.orders.updateOrderById(order._id, {
+        lastCreditNoteInUtc: timeInUtc.valueOf(),
+      });
+
+      await this.vouchers.issueInvoice(invoice);
+    }
+
+    return invoice;
   }
 }

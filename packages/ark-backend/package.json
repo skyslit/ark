@@ -1,6 +1,6 @@
 {
   "name": "@skyslit/ark-backend",
-  "version": "2.48.2",
+  "version": "2.48.3",
   "description": "A business framework for building Ark based event driven backend application",
   "main": "./build/index.js",
   "private": false,
@@ -68,13 +68,13 @@
     "busboy": "^1.6.0",
     "cookie-parser": "^1.4.5",
     "jsonwebtoken": "^8.5.1",
+    "moment": "^2.29.4",
     "morgan": "^1.10.0",
     "node-html-parser": "^2.0.0",
     "path-to-regexp": "^6.2.0",
     "redis": "4.5.1",
     "socket.io": "^4.5.4",
-    "supertest": "^6.0.1",
-    "moment": "^2.29.4"
+    "supertest": "^6.0.1"
   },
   "publishConfig": {
     "access": "public"

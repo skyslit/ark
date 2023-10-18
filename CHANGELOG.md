@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.50.0](https://github.com/skyslit/ark/compare/v2.49.0...v2.50.0) (2023-10-18)
+
+
+### Features
+
+* added cookie domain feature for analytics ([e4169d6](https://github.com/skyslit/ark/commit/e4169d69648f625a680010555e7f89cbd4b14cac))
+
+
+
+
+
 # [2.49.0](https://github.com/skyslit/ark/compare/v2.48.3...v2.49.0) (2023-10-18)
 
 

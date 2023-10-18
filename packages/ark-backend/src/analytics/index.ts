@@ -5,11 +5,20 @@ import { ObjectId } from 'mongodb';
 import Joi from 'joi';
 import moment from 'moment';
 
+export type AnalyticsServerOptions = {
+  cookieDomain?: string;
+};
+
 export function enableAnalytics(
   context: ApplicationContext,
   controller: ControllerContext<any>,
-  moduleId: string
+  moduleId: string,
+  opts?: AnalyticsServerOptions
 ) {
+  if (!opts) {
+    opts = {};
+  }
+
   const useService = useServiceCreator(moduleId, context);
 
   /**
@@ -43,6 +52,8 @@ export function enableAnalytics(
     collectionNames.eventsCollectionName
   );
 
+  let cookieDomain = opts.cookieDomain;
+
   const initialiseSession = async (
     nowInUtc: moment.Moment,
     props: any,
@@ -60,6 +71,7 @@ export function enableAnalytics(
     if (Boolean(tid) && tid !== props.args.req.cookies['sa_tid']) {
       props.args.res.cookie('sa_tid', tid, {
         expires: moment().utc().add(3, 'years').toDate(),
+        domain: cookieDomain,
       });
     }
 
@@ -72,6 +84,13 @@ export function enableAnalytics(
     if (!user) {
       console.log('Initialising new user');
       const op = await usersCollection.insertOne({
+        _id: (() => {
+          try {
+            return new ObjectId(analyticsUserId);
+          } catch (e) {
+            return undefined;
+          }
+        })(),
         userObj: null,
         createdAtUtc: timestampInUtc,
         lastSeenInUtc: timestampInUtc,
@@ -81,6 +100,7 @@ export function enableAnalytics(
       analyticsUserId = String(op.insertedId);
       props.args.res.cookie('sa_uid', analyticsUserId, {
         expires: moment().utc().add(1, 'year').toDate(),
+        domain: cookieDomain,
       });
 
       user = await usersCollection.findOne({
@@ -97,6 +117,13 @@ export function enableAnalytics(
     if (!session) {
       console.log('Initialising new session');
       const op = await sessionsCollection.insertOne({
+        _id: (() => {
+          try {
+            return new ObjectId(analyticsSessionId);
+          } catch (e) {
+            return undefined;
+          }
+        })(),
         analyticsUserId,
         userObj: session?.userObj,
         createdAtUtc: timestampInUtc,
@@ -113,6 +140,7 @@ export function enableAnalytics(
 
     props.args.res.cookie('sa_sid', analyticsSessionId, {
       expires: moment().utc().add(15, 'minutes').toDate(),
+      domain: cookieDomain,
     });
 
     return {
@@ -145,34 +173,6 @@ export function enableAnalytics(
           props.args.req.cookies['sa_sid'],
           props.args.input.tid
         );
-
-        if (!instance.analyticsUserId) {
-          console.log('Initialising new user');
-          const op = await usersCollection.insertOne({});
-
-          instance.analyticsUserId = String(op.insertedId);
-          props.args.res.cookie('sa_uid', instance.analyticsUserId, {
-            expires: moment().utc().add(1, 'year').toDate(),
-          });
-        } else {
-          instance.user = await usersCollection.findOne({
-            _id: new ObjectId(instance.analyticsUserId),
-          });
-        }
-
-        if (!instance.analyticsSessionId) {
-          console.log('Initialising new session');
-          const op = await sessionsCollection.insertOne({});
-
-          instance.analyticsSessionId = String(op.insertedId);
-          props.args.res.cookie('sa_sid', instance.analyticsSessionId, {
-            expires: moment().utc().add(15, 'minutes').toDate(),
-          });
-        } else {
-          instance.session = await sessionsCollection.findOne({
-            _id: new ObjectId(instance.analyticsSessionId),
-          });
-        }
 
         let eventsToPush: any[] = [];
         let hasUpdatedLastSeen = false;

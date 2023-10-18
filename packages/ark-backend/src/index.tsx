@@ -59,7 +59,7 @@ import {
 import { createAdapter } from '@socket.io/redis-adapter';
 import { FolderOperationsApi, createDynamicsV2Services } from './dynamics-v2';
 import stream from 'stream';
-import { enableAnalytics } from './analytics';
+import { AnalyticsServerOptions, enableAnalytics } from './analytics';
 
 type HttpVerbs =
   | 'all'
@@ -224,7 +224,7 @@ declare global {
       ) => WebAppRenderer;
       enableDynamicsServer: (conf?: DynamicsServerConfig) => void;
       enableDynamicsV2Services: (conf?: DynamicsServerV2Config) => void;
-      enableAnalytics: () => void;
+      enableAnalytics: (conf?: AnalyticsServerOptions) => void;
       useRemoteConfig: (
         initialState?: Partial<RemoteConfig>,
         dbName?: string
@@ -1927,12 +1927,12 @@ export const Backend = createPointer<Ark.Backend>(
     enableDynamicsV2Services: (conf?) => {
       return createDynamicsV2Services(context, controller, moduleId, conf);
     },
-    enableAnalytics: () => {
+    enableAnalytics: (conf) => {
       setRuntimeVars({
         ANALYTICS_SERVER_ENABLED: 'true',
       });
 
-      return enableAnalytics(context, controller, moduleId);
+      return enableAnalytics(context, controller, moduleId, conf);
     },
     useRemoteConfig: (initialState, dbName) => {
       dbName = dbName ? dbName : 'default';

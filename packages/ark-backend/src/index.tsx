@@ -10,6 +10,7 @@ import {
   useEnv,
   getRuntimeVars,
   setDefaultEnv,
+  setRuntimeVars,
 } from '@skyslit/ark-core';
 import expressApp, {
   CookieOptions,
@@ -58,6 +59,7 @@ import {
 import { createAdapter } from '@socket.io/redis-adapter';
 import { FolderOperationsApi, createDynamicsV2Services } from './dynamics-v2';
 import stream from 'stream';
+import { enableAnalytics } from './analytics';
 
 type HttpVerbs =
   | 'all'
@@ -222,6 +224,7 @@ declare global {
       ) => WebAppRenderer;
       enableDynamicsServer: (conf?: DynamicsServerConfig) => void;
       enableDynamicsV2Services: (conf?: DynamicsServerV2Config) => void;
+      enableAnalytics: () => void;
       useRemoteConfig: (
         initialState?: Partial<RemoteConfig>,
         dbName?: string
@@ -1924,6 +1927,13 @@ export const Backend = createPointer<Ark.Backend>(
     enableDynamicsV2Services: (conf?) => {
       return createDynamicsV2Services(context, controller, moduleId, conf);
     },
+    enableAnalytics: () => {
+      setRuntimeVars({
+        ANALYTICS_SERVER_ENABLED: 'true',
+      });
+
+      return enableAnalytics(context, controller, moduleId);
+    },
     useRemoteConfig: (initialState, dbName) => {
       dbName = dbName ? dbName : 'default';
 
@@ -3273,6 +3283,8 @@ function loadSimulatedUser(): { token: string; user: any; hasUser: boolean } {
 const PASS_THRU_ENV_VARS: string[] = [
   'APP_INFO_BASE_PATH',
   'COMPASS_DEMO_MODE',
+  'DISABLE_ANALYTICS',
+  'ANALYTICS_SERVER_ENABLED',
 ];
 
 /**

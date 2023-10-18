@@ -34,6 +34,7 @@ import {
   createFolderApis,
   FolderIntegrationApi,
 } from './dynamics-v2/widgets/catalogue';
+import { analytics } from './analytics';
 
 export type RenderMode = 'ssr' | 'csr';
 
@@ -359,6 +360,33 @@ export function makeApp(
 ): Promise<React.FunctionComponent> {
   // Set renderMode flag to context
   ctx.setData('default', '__react___renderMode', mode);
+
+  if (mode === 'csr') {
+    let disableAnalytics = false;
+    try {
+      disableAnalytics =
+        ___hydrated_redux___['default/RESPONSE____context']['meta'][
+          'passThroughVariables'
+        ]['ANALYTICS_SERVER_ENABLED'] !== 'true';
+      if (disableAnalytics === false) {
+        if (global?.window?.localStorage) {
+          disableAnalytics =
+            global?.window?.localStorage.getItem('DISABLE_ANALYTICS') ===
+            '&sd31100';
+        }
+      }
+    } catch (e) {
+      console.error(e);
+    }
+
+    if (disableAnalytics === false) {
+      analytics.initialise();
+    } else {
+      console.log('Analytics disabled');
+    }
+  } else {
+    console.log(`Skipping analytics in SSR mode`);
+  }
 
   const opts: MakeAppOptions = Object.assign<
     MakeAppOptions,
@@ -821,7 +849,7 @@ const useSocketCreator: (
 
               socket.on('connect', connectionHandler);
               return () => {
-                socket.off('connect', connectionHandler)
+                socket.off('connect', connectionHandler);
               };
             }
           }

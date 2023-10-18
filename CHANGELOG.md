@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+# [2.49.0](https://github.com/skyslit/ark/compare/v2.48.3...v2.49.0) (2023-10-18)
+
+
+### Features
+
+* added analytics support ([f17e39a](https://github.com/skyslit/ark/commit/f17e39a67899fbda1d03fa8eeba8881d0c4a7d0c))
+
+
+
+
+
 ## [2.48.3](https://github.com/skyslit/ark/compare/v2.48.2...v2.48.3) (2023-10-16)
 
 **Note:** Version bump only for package root

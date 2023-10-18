@@ -268,7 +268,7 @@ export class Analytics {
 
   getWindowLocationHref(): string {
     try {
-      return global?.window?.location?.href;
+      return `${global?.window?.location?.origin}${global?.window?.location?.pathname}`;
     } catch (e) {
       return undefined;
     }

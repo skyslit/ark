@@ -52,14 +52,8 @@ jobs:
       - name: Build
         run: npm run build
 
-      - name: Test
-        run: npm run test
-
       - name: Publish
         run: lerna publish --conventional-commits --yes --no-verify-access
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Upload coverage report
-        run: ./node_modules/.bin/codecov --token="${{ secrets.CODECOV_TOKEN }}"

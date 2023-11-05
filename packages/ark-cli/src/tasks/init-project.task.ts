@@ -19,7 +19,7 @@ const skipDepInstalls: boolean = false;
 
 // type ProjectType = 'solution' | 'module';
 
-export default (cwd_?: string) => {
+export default (cwd_?: string, options?: any) => {
   const packager: 'npm' | 'yarn' = 'npm';
   const cwd = cwd_ || process.cwd();
   const git = gitP(cwd);
@@ -446,20 +446,28 @@ export default (cwd_?: string) => {
   // }
 
   return Promise.resolve()
-    .then(() =>
-      inquirer.prompt([
-        {
-          name: 'projectName',
-          message: 'Name of this project?',
-          type: 'input',
-          default: path.basename(cwd),
-        },
-      ])
-    )
-    .then((input) =>
-      job.run({
+    .then(() => {
+      if (!options?.name) {
+        return inquirer.prompt([
+          {
+            name: 'projectName',
+            message: 'Name of this project?',
+            type: 'input',
+            default: path.basename(cwd),
+          },
+        ]);
+      }
+
+      console.log('options?.name', options?.name);
+
+      return {
+        name: options?.name,
+      };
+    })
+    .then((input) => {
+      return job.run({
         cwd,
         ...input,
-      })
-    );
+      });
+    });
 };

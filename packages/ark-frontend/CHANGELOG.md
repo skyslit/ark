@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.50.1](https://github.com/skyslit/ark/compare/v2.50.0...v2.50.1) (2023-10-18)
+
+
+### Bug Fixes
+
+* issue with search query in analytics ([a28179b](https://github.com/skyslit/ark/commit/a28179be0e52eb3d999ae1c62f96e09ee96605da))
+
+
+
+
+
 # [2.49.0](https://github.com/skyslit/ark/compare/v2.48.3...v2.49.0) (2023-10-18)
 
 

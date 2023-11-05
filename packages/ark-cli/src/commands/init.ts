@@ -10,6 +10,12 @@ const optionDefs = [
     type: Boolean,
     description: 'Display help information about this command',
   },
+  {
+    name: 'name',
+    alias: 'n',
+    type: String,
+    description: 'Set name of the project',
+  },
 ];
 
 export default (argv?: string[]) => {
@@ -46,7 +52,7 @@ export default (argv?: string[]) => {
         },
       ])
     );
-    runInitProject()
+    runInitProject(undefined, { name: options?.name })
       .then(() => {
         process.exit(0);
       })

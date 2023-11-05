@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [2.50.2](https://github.com/skyslit/ark/compare/v2.50.1...v2.50.2) (2023-11-05)
+
+
+### Bug Fixes
+
+* added name argument ([928868e](https://github.com/skyslit/ark/commit/928868e1ba3086ca36f7265cf16d49d00a151977))
+
+
+
+
+
 ## [2.50.1](https://github.com/skyslit/ark/compare/v2.50.0...v2.50.1) (2023-10-18)
 
 **Note:** Version bump only for package @skyslit/ark

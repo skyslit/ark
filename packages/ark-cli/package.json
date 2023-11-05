@@ -1,6 +1,6 @@
 {
   "name": "@skyslit/ark",
-  "version": "2.50.1",
+  "version": "2.50.2",
   "description": "Ark CLI uses Ark DevTools to build and automate Ark Application development process",
   "main": "./build/index.js",
   "private": false,
